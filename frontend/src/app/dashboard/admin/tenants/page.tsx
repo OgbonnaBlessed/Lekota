@@ -37,7 +37,7 @@ type Tenant = {
 const ITEMS_PER_PAGE = 10;
 
 const Page = () => {
-  const { data, isLoading } = useGetTenantsQuery();
+  const { data, isLoading } = useGetTenantsQuery({});
   const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
   const [open, setOpen] = useState<boolean>(false);
   const [show, setShow] = useState<boolean>(false);
