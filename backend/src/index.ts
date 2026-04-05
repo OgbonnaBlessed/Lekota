@@ -17,12 +17,15 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(helmet());
 
-app.use(
-  cors({
-    origin: "http://localhost:3000", // frontend URL
-    credentials: true, // ✅ REQUIRED
-  })
-);
+const allowedOrigins = [
+  "http://localhost:3000", // local dev
+  "https://lekota-ebon.vercel.app/", // deployed frontend
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true, // if you send cookies, optional
+}));
 
 app.use(express.json());
 app.use(cookieParser());
