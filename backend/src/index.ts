@@ -19,7 +19,7 @@ app.use(helmet());
 
 const allowedOrigins = [
   "http://localhost:3000", // local dev
-  "https://lekota-ebon.vercel.app/", // deployed frontend
+  "https://lekota-virid.vercel.app", // deployed frontend
 ];
 
 app.use(cors({
