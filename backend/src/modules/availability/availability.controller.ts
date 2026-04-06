@@ -17,8 +17,6 @@ export const setAvailability = async (req: any, res: Response) => {
       endTime: s.end_time,
     }));
 
-    console.log(filtered)
-
   if (filtered.length > 0) {
     await Availability.insertMany(filtered);
   }

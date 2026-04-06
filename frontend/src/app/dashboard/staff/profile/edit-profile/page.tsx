@@ -2,17 +2,20 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Command, CommandItem } from "@/components/ui/command";
 import Input from "@/components/ui/input";
 import Modal from "@/components/ui/modal";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import EditProfileSkeleton from "@/components/ui/skeleton/EditProfileSkeleton";
 import {
   useGetProfileQuery,
   useUpdateProfileMutation,
 } from "@/redux/api/staff.api";
+import { AnimatePresence, motion } from "framer-motion";
 import { ImageIcon, ImageUpIcon, Loader2, Plus, X } from "lucide-react";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 
 type Form = {
   image: File | null;
@@ -22,7 +25,9 @@ type Form = {
   service: string;
   sub_service: string[];
   location: string;
+  phone: string;
   bio: string;
+  gender: string;
 };
 
 const Page = () => {
@@ -44,7 +49,9 @@ const Page = () => {
     service: "",
     sub_service: [],
     location: "",
+    phone: "",
     bio: "",
+    gender: "other",
   });
 
   const initialRef = useRef<Form | null>(null);
@@ -62,7 +69,9 @@ const Page = () => {
         service: data.service || "",
         sub_service: data.sub_service || [],
         location: data.location || "",
+        phone: data.phone || "",
         bio: data.bio || "",
+        gender: data.gender || "other",
       };
 
       setForm(initial);
@@ -152,6 +161,14 @@ const Page = () => {
     }));
   };
 
+  useEffect(() => {
+    return () => {
+      if (form.image) {
+        URL.revokeObjectURL(URL.createObjectURL(form.image));
+      }
+    };
+  }, [form.image]);
+
   // ===============================
   // SUBMIT
   // ===============================
@@ -163,7 +180,13 @@ const Page = () => {
     let imageUrl = form.imageUrl;
 
     if (form.image) {
-      imageUrl = await uploadToCloudinary(form.image);
+      try {
+        imageUrl = await uploadToCloudinary(form.image);
+      } catch {
+        toast.error("Image upload failed");
+        setUploading(false);
+        return;
+      }
     }
 
     const payload = {
@@ -172,10 +195,11 @@ const Page = () => {
       service: form.service,
       sub_service: form.sub_service,
       location: form.location,
+      phone: form.phone,
       bio: form.bio,
+      gender: form.gender,
       image: imageUrl,
     };
-    console.log("Payload", payload);
 
     await updateProfile(payload);
 
@@ -281,7 +305,7 @@ const Page = () => {
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    exit={{ opacity: 0, }}
+                    exit={{ opacity: 0 }}
                     transition={{ duration: 0.5, ease: "easeOut" }}
                     onClick={() => setShowAddSubserviceField(true)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 bg-[#2D36E0] text-white p-2 rounded-full cursor-pointer"
@@ -326,12 +350,48 @@ const Page = () => {
           onChange={handleChange}
         />
         <Input
+          name="phone"
+          label="Phone number"
+          type="number"
+          placeholder="Enter your phone number"
+          value={form.phone}
+          onChange={handleChange}
+        />
+        <Input
           name="bio"
           label="Bio"
           placeholder="Enter your bio"
           value={form.bio}
           onChange={handleChange}
         />
+
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium text-[#6B7280]">Gender</label>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className="border px-3 py-2 rounded-lg text-left"
+              >
+                {form.gender || "Select gender"}
+              </button>
+            </PopoverTrigger>
+
+            <PopoverContent className="w-full p-0">
+              <Command>
+                {["male", "female", "other"].map((g) => (
+                  <CommandItem
+                    key={g}
+                    onSelect={() => setForm((prev) => ({ ...prev, gender: g }))}
+                  >
+                    {g}
+                  </CommandItem>
+                ))}
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
 
         {/* BUTTON */}
         <Button

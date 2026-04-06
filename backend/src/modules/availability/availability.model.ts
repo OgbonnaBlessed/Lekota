@@ -5,11 +5,11 @@ const AvailabilitySchema = new Schema(
     staff: { type: Schema.Types.ObjectId, ref: "User" },
 
     day: {
-      type: String, // "Mon", "Tue"
+      type: String,
     },
 
-    startTime: String, // "09:00"
-    endTime: String, // "17:00"
+    startTime: String,
+    endTime: String,
   },
   { timestamps: true },
 );

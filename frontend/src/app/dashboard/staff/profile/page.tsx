@@ -9,7 +9,6 @@ import { useEffect, useState } from "react";
 const Page = () => {
   const { data, isLoading } = useGetProfileQuery({});
   const user = data;
-  console.log("Profile:", user);
 
   const [showSkeleton, setShowSkeleton] = useState<boolean>(true);
 
@@ -39,17 +38,17 @@ const Page = () => {
         </div>
 
         <div>
-          <h2>{user?.service}</h2>
+          <h2>{user?.service || "Not set"}</h2>
           <p>Service</p>
         </div>
 
         <div>
-          <h2>{user?.location}</h2>
+          <h2>{user?.location || "Not set"}</h2>
           <p>Location</p>
         </div>
 
         <div>
-          <h2>{user?.phone}</h2>
+          <h2>{user?.phone || "Not set"}</h2>
           <p>Phone</p>
         </div>
       </div>

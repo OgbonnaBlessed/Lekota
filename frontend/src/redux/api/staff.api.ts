@@ -6,6 +6,7 @@ export const staffApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getProfile: builder.query({
       query: () => "/staff/profile",
+      providesTags: ["Profile"],
     }),
 
     updateProfile: builder.mutation({
@@ -14,6 +15,7 @@ export const staffApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: data,
       }),
+      invalidatesTags: ["Profile"],
       async onQueryStarted(_, { queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
@@ -30,6 +32,7 @@ export const staffApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["Availability"],
       async onQueryStarted(_, { queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
@@ -44,6 +47,7 @@ export const staffApi = baseApi.injectEndpoints({
 
     getAvailability: builder.query({
       query: () => "/availability",
+      providesTags: ["Availability"],
     }),
   }),
 });

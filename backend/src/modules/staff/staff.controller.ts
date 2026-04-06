@@ -30,20 +30,30 @@ export const getStaffProfile = async (req: any, res: Response) => {
 // 👤 UPDATE STAFF PROFILE
 // ========================================
 export const updateStaffProfile = async (req: any, res: Response) => {
-  const { name, email, service, sub_service, location, bio, image } = req.body;
+  const {
+    name,
+    email,
+    service,
+    sub_service,
+    location,
+    phone,
+    bio,
+    image,
+    gender,
+  } = req.body;
 
   const updateData: any = {};
 
-  // ✅ Top-level fields
   if (name) updateData.name = name;
   if (email) updateData.email = email;
 
-  // ✅ Nested profile fields
   if (service) updateData["profile.service"] = service;
   if (sub_service) updateData["profile.sub_service"] = sub_service;
   if (location) updateData["profile.location"] = location;
+  if (phone) updateData["profile.phone"] = phone;
   if (bio) updateData["profile.bio"] = bio;
   if (image) updateData["profile.image"] = image;
+  if (gender) updateData["profile.gender"] = gender;
 
   const user = await User.findByIdAndUpdate(
     req.user.id,
@@ -55,15 +65,22 @@ export const updateStaffProfile = async (req: any, res: Response) => {
     return res.status(404).json({ message: "User not found" });
   }
 
-  await sendNotification(
-    req.user.id,
-    "Profile Updated",
-    "Your profile was successfully updated",
-  );
+  // ✅ RETURN SAME SHAPE AS GET PROFILE
+  const response = {
+    name: user.name,
+    email: user.email,
+    image: user.profile?.image,
+    location: user.profile?.location,
+    phone: user.profile?.phone,
+    bio: user.profile?.bio,
+    service: user.profile?.service,
+    sub_service: user.profile?.sub_service,
+    gender: user.profile?.gender || "other",
+  };
 
   res.json({
     message: "Profile updated successfully",
-    user,
+    data: response,
   });
 };
 

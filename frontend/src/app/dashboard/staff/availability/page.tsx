@@ -2,18 +2,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { ChevronDown, Plus, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import AvailabilitySkeleton from "@/components/ui/skeleton/AvailabitySkeleton";
 import {
   useGetAvailabilityQuery,
   useSetAvailabilityMutation,
 } from "@/redux/api/staff.api";
 import { TimePicker } from "antd";
 import dayjs from "dayjs";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton/skeleton";
-import AvailabilitySkeleton from "@/components/ui/skeleton/AvailabitySkeleton";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronDown, Plus, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 const { RangePicker } = TimePicker;
 
@@ -34,11 +33,18 @@ type DaySchedule = {
 };
 
 const Page = () => {
-  const [setAvailability] = useSetAvailabilityMutation();
+  const [setAvailability, { isSuccess }] = useSetAvailabilityMutation();
   const {
     data: availabilityData,
     isLoading,
-  } = useGetAvailabilityQuery({});
+    refetch,
+  } = useGetAvailabilityQuery(undefined);
+
+  useEffect(() => {
+    if (isSuccess) {
+      refetch();
+    }
+  }, [isSuccess, refetch]);
 
   const [timeZone, setTimeZone] = useState<string>("UTC +00:00");
   const [show, setShow] = useState<boolean>(false);
@@ -90,7 +96,7 @@ const Page = () => {
   useEffect(() => {
     if (!availabilityData) return;
 
-    setSchedule((prev) => {
+    setSchedule(() => {
       const updated = { ...createDefaultSchedule() };
 
       availabilityData.forEach((item: any) => {
