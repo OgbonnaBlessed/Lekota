@@ -8,21 +8,18 @@ const EditProfileSkeleton = () => {
       {/* ================= PROFILE HEADER ================= */}
       <div className="flex items-start gap-4">
         {/* Upload circle */}
-        <Skeleton className="w-24 h-24 rounded-full shimmer-soft border border-[#2D36E0]/30" />
-
-        {/* Optional preview (faded secondary circle) */}
-        <Skeleton className="w-24 h-24 rounded-full shimmer-soft opacity-40 hidden sm:block" />
+        <Skeleton className="w-24 h-24 rounded-full border border-[#2D36E0]/30" />
 
         {/* Name + email + upload */}
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <Skeleton className="h-4 w-32 shimmer-soft" />
-            <Skeleton className="h-3 w-40 shimmer-soft" />
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-3 w-40" />
           </div>
 
           <div className="flex items-center gap-2">
-            <Skeleton className="h-3 w-3 shimmer-soft rounded-sm" />
-            <Skeleton className="h-3 w-36 shimmer-soft" />
+            <Skeleton className="h-3 w-3 rounded-sm" />
+            <Skeleton className="h-3 w-36" />
           </div>
         </div>
       </div>
@@ -41,8 +38,8 @@ const EditProfileSkeleton = () => {
               >
                 {[1, 2].map((_, j) => (
                   <div key={j} className="flex flex-col gap-2 w-full">
-                    <Skeleton className="h-3 w-24 shimmer-soft" />
-                    <Skeleton className="h-10 w-full rounded-md shimmer-soft" />
+                    <Skeleton className="h-3 w-24" />
+                    <Skeleton className="h-10 w-full rounded-md" />
                   </div>
                 ))}
               </div>
@@ -56,10 +53,10 @@ const EditProfileSkeleton = () => {
               style={{ animationDelay: `${i * 0.1}s` }}
             >
               {/* Label */}
-              <Skeleton className="h-3 w-28 shimmer-soft" />
+              <Skeleton className="h-3 w-28" />
 
               {/* Input */}
-              <Skeleton className="h-10 w-full rounded-md shimmer-soft" />
+              <Skeleton className="h-10 w-full rounded-md" />
             </div>
           );
         })}
@@ -67,7 +64,7 @@ const EditProfileSkeleton = () => {
 
       {/* ================= BUTTON ================= */}
       <div className="mt-5">
-        <Skeleton className="h-12 w-40 rounded-md shimmer-soft" />
+        <Skeleton className="h-12 w-40 rounded-md" />
       </div>
     </div>
   );

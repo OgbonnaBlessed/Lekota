@@ -11,7 +11,7 @@ const TenantSkeleton = () => {
       {/* ================= DESKTOP TABLE ================= */}
       <div className="hidden md:block border rounded-xl bg-white overflow-hidden">
         <div className="p-4 space-y-4">
-          {Array.from({ length: 8 }).map((_, i) => (
+          {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="grid grid-cols-6 gap-4 items-center">
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-full" />
@@ -26,7 +26,7 @@ const TenantSkeleton = () => {
 
       {/* ================= MOBILE CARDS ================= */}
       <div className="md:hidden space-y-4">
-        {Array.from({ length: 6 }).map((_, i) => (
+        {Array.from({ length: 5 }).map((_, i) => (
           <div key={i} className="border rounded-xl p-4 bg-white space-y-3">
             <div className="flex justify-between">
               <div className="space-y-2">

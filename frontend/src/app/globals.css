@@ -21,8 +21,6 @@ body {
 
 * {
   box-sizing: border-box;
-  /* padding: 0; */
-  /* margin: 0; */
 }
 
 a {
@@ -32,6 +30,7 @@ a {
 
 button {
   cursor: pointer;
+  outline: none;
 }
 
 input[type="time"] {
@@ -53,6 +52,17 @@ input[type="time"]::-webkit-inner-spin-button {
 
 textarea::-webkit-scrollbar {
   display: none;
+}
+
+/* Hide scrollbar for Chrome, Safari and Edge */
+.no-scroll-bar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for Firefox */
+.no-scroll-bar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
 /* ROOT */

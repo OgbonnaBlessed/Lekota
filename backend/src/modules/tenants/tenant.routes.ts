@@ -10,6 +10,7 @@ import {
   getServices,
   updateServiceStatus,
   updateService,
+  updateTenantStatus,
 } from "./tenant.controller";
 import { protect } from "@/middleware/auth.middleware";
 import { Role } from "@/types";
@@ -18,6 +19,7 @@ const router = Router();
 
 router.get("/", protect([Role.ADMIN]), getTenants);
 router.post("/create", protect([Role.ADMIN]), createTenant);
+router.patch("/status", protect([Role.ADMIN]), updateTenantStatus);
 router.get("/users", protect([Role.TENANT_ADMIN]), getUsers);
 router.post("/users/create", protect([Role.TENANT_ADMIN]), createUser);
 router.patch("/users/status", protect([Role.TENANT_ADMIN]), updateUserStatus);

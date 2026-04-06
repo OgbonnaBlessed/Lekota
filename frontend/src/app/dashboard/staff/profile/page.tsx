@@ -1,35 +1,60 @@
+"use client";
+
+import ProfileSkeleton from "@/components/ui/skeleton/ProfileSkeleton";
+import { useGetProfileQuery } from "@/redux/api/staff.api";
 import { Pencil } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
-const page = () => {
+const Page = () => {
+  const { data, isLoading } = useGetProfileQuery({});
+  const user = data;
+  console.log("Profile:", user);
+
+  const [showSkeleton, setShowSkeleton] = useState<boolean>(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSkeleton(false);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading || showSkeleton) return <ProfileSkeleton />;
+
   return (
     <div className="w-full flex flex-col border rounded-xl overflow-hidden">
       <div className="w-full flex items-center justify-between bg-gray-100 p-5">
-        <h1 className="text-xl sm:text-xl">Profile</h1>
+        <h1 className="text-xl">Profile</h1>
         <Link href="./profile/edit-profile">
-          <Pencil className="p-0.5" />
+          <Pencil />
         </Link>
       </div>
-      <div className="flex items-center justify-between gap-8 flex-wrap p-5">
-        <div className="flex flex-col gap-2">
-          <h2 className="text-lg">Brian Elvis</h2>
-          <p className="text-sm text-gray-500">Name</p>
+
+      <div className="flex justify-between gap-8 flex-wrap p-5">
+        <div>
+          <h2>{user?.name}</h2>
+          <p>Name</p>
         </div>
-        <div className="flex flex-col gap-2">
-          <h2 className="text-lg">Service 1</h2>
-          <p className="text-sm text-gray-500">Subservice 1</p>
+
+        <div>
+          <h2>{user?.service}</h2>
+          <p>Service</p>
         </div>
-        <div className="flex flex-col gap-2">
-          <h2 className="text-lg">Not created</h2>
-          <p className="text-sm text-gray-500">Location</p>
+
+        <div>
+          <h2>{user?.location}</h2>
+          <p>Location</p>
         </div>
-        <div className="flex flex-col gap-2">
-          <h2 className="text-lg">Not created</h2>
-          <p className="text-sm text-gray-500">Phone number</p>
+
+        <div>
+          <h2>{user?.phone}</h2>
+          <p>Phone</p>
         </div>
       </div>
     </div>
   );
 };
 
-export default page;
+export default Page;

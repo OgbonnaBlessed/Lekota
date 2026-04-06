@@ -77,6 +77,29 @@ export const createTenant = async (req: Request, res: Response) => {
   }
 };
 
+export const updateTenantStatus = async (req: any, res: Response) => {
+  try {
+    const { tenantId, status } = req.body;
+
+    const tenant = await Tenant.findOne({
+      _id: tenantId,
+    });
+
+    if (!tenant) {
+      return res.status(404).json({ message: "Tenant not found" });
+    }
+
+    tenant.status = status;
+    await tenant.save();
+
+    return res.json({
+      message: `Tenant ${status} successfully`,
+    });
+  } catch {
+    return res.status(500).json({ message: "Failed to update tenant status" });
+  }
+};
+
 // ======================================================
 // 👤 TENANT ADMIN: CREATE USER (STAFF / CLIENT)
 // ======================================================
@@ -134,7 +157,7 @@ export const getUsers = async (req: any, res: Response) => {
     if (status) filter.status = status;
 
     const users = await User.find(filter).populate("tenant", "organization");
-    
+
     return res.json({
       message: "Users fetched successfully",
       users,
@@ -171,7 +194,7 @@ export const updateUserStatus = async (req: any, res: Response) => {
     user.status = status;
     await user.save();
 
-    return res.json({ message: "User updated successfully" });
+    return res.json({ message: `User ${status} updated successfully` });
   } catch {
     return res.status(500).json({ message: "Update failed" });
   }

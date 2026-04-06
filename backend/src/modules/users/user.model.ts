@@ -33,7 +33,7 @@ const UserSchema = new Schema(
 
       // staff only
       service: String,
-      sub_service: String,
+      sub_service: [String],
     },
 
     resetPasswordToken: String,

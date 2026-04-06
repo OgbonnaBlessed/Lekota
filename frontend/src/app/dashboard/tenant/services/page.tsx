@@ -22,7 +22,7 @@ import {
 import CreateServiceModal from "@/components/layout/CreateServiceModal";
 import ServiceDetailsSheet from "@/components/layout/ServiceDetailsSheet";
 import ServicesSkeleton from "@/components/ui/skeleton/ServicesSkeleton";
-import formatDate from "@/lib/format-date";
+import formatDate from "@/utils/format-date";
 import { useGetServicesQuery } from "@/redux/api/tenant.api";
 import { MoreHorizontal, Plus } from "lucide-react";
 import { toast } from "sonner";

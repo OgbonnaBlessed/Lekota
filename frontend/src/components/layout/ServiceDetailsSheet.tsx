@@ -8,13 +8,14 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Plus, X, Loader2, ChevronDown } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
 import {
   useUpdateServiceMutation,
   useUpdateServiceStatusMutation,
 } from "@/redux/api/tenant.api";
+import { Loader2, Plus, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { Button } from "../ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,11 +24,24 @@ import {
 } from "../ui/dropdown-menu";
 
 const ServiceDetailsSheet = ({ service, open, onOpenChange }: any) => {
+  const [updateService, { isLoading: isSaving }] = useUpdateServiceMutation();
+  const [updateStatus] = useUpdateServiceStatusMutation();
+
+  const [serviceStatus, setServiceStatus] = useState<string | undefined>(
+    service?.status,
+  );
   const [subservices, setSubservices] = useState<string[]>([]);
   const [showSubInput, setShowSubInput] = useState(false);
   const [newSub, setNewSub] = useState("");
-  const [updateService, { isLoading: isSaving }] = useUpdateServiceMutation();
-  const [updateStatus] = useUpdateServiceStatusMutation();
+
+  const handleStatusChange = async (status: string) => {
+    if (!service) return;
+
+    await updateStatus({
+      serviceId: service.id || (service as any)._id,
+      status,
+    });
+  };
 
   // ✅ Sync state when service changes
   useEffect(() => {
@@ -37,6 +51,7 @@ const ServiceDetailsSheet = ({ service, open, onOpenChange }: any) => {
       setSubservices([]);
     }
 
+    setServiceStatus(service?.status);
     setNewSub("");
     setShowSubInput(false);
   }, [service]);
@@ -211,45 +226,51 @@ const ServiceDetailsSheet = ({ service, open, onOpenChange }: any) => {
                 <td className="text-muted-foreground py-2 pr-6 font-medium">
                   Status
                 </td>
-                <div className="flex items-center gap-4">
-                  <td className="py-2 flex items-center gap-2">
-                    <span
-                      className={`w-2 h-2 rounded-full ${
-                        service.status === "active"
-                          ? "bg-green-500"
-                          : service.status === "suspended"
-                            ? "bg-yellow-500"
-                            : "bg-red-500"
-                      }`}
-                    />
-                    <span className="capitalize">{service.status}</span>
-                  </td>
+                <td className="py-2 flex items-center gap-2">
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      serviceStatus === "active"
+                        ? "bg-green-500"
+                        : serviceStatus === "suspended"
+                          ? "bg-yellow-500"
+                          : "bg-red-500"
+                    }`}
+                  />
+                   <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="capitalize">
+                    {serviceStatus}
+                  </Button>
+                </DropdownMenuTrigger>
 
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <td className="bg-gray-200 text-gray-500 p-1 rounded-sm cursor-pointer">
-                        <ChevronDown size={12} />
-                      </td>
-                    </DropdownMenuTrigger>
-
-                    <DropdownMenuContent align="end">
-                      {["active", "suspended", "deleted"].map((status) => (
-                        <DropdownMenuItem
-                          key={status}
-                          onClick={() =>
-                            updateStatus({
-                              serviceId: service._id,
-                              status,
-                            })
-                          }
-                          className="capitalize cursor-pointer"
-                        >
-                          {status}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                <DropdownMenuContent>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setServiceStatus("active");
+                      handleStatusChange("active");
+                    }}
+                  >
+                    Active
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setServiceStatus("suspended");
+                      handleStatusChange("suspended");
+                    }}
+                  >
+                    Suspended
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setServiceStatus("deleted");
+                      handleStatusChange("deleted");
+                    }}
+                  >
+                    Deleted
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+                </td>
               </tr>
 
               {/* Organization */}

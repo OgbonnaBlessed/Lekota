@@ -44,6 +44,24 @@ export const adminApi = baseApi.injectEndpoints({
       },
     }),
 
+    updateTenantStatus: builder.mutation({
+      query: (data) => ({
+        url: "/tenants/status",
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["Tenants"],
+
+      async onQueryStarted(_, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          toast.success(data?.message);
+        } catch (err: any) {
+          toast.error(err?.error?.data?.message || "Update failed");
+        }
+      },
+    }),
+
     getOverviewAnalytics: builder.query({
       query: () => "/analytics/overview",
 
@@ -77,6 +95,7 @@ export const adminApi = baseApi.injectEndpoints({
 export const {
   useGetTenantsQuery,
   useCreateTenantMutation,
+  useUpdateTenantStatusMutation,
   useGetOverviewAnalyticsQuery,
   useGetThroughputQuery,
 } = adminApi;

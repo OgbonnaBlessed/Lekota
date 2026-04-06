@@ -46,7 +46,7 @@ export default function RootLayout({
         className={`${inter.className} w-full h-full flex items-center justify-center`}
       >
         <ReduxProvider>
-          <Toaster position="bottom-right" richColors closeButton />
+          <Toaster position="bottom-right" closeButton />
           {children}
         </ReduxProvider>
       </body>

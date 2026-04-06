@@ -25,7 +25,7 @@ import { useGetUsersQuery } from "@/redux/api/tenant.api";
 import { MoreHorizontal, Plus } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
-import formatDate from "@/lib/format-date";
+import formatDate from "@/utils/format-date";
 
 type User = {
   id: string;
@@ -215,6 +215,7 @@ const Page = () => {
                           setSelectedUser(user);
                           setOpen(true);
                         }}
+                        className="cursor-pointer"
                       >
                         View Details
                       </DropdownMenuItem>

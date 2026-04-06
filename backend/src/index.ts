@@ -19,9 +19,9 @@ app.use(helmet());
 
 app.use(
   cors({
-    origin: "http://localhost:3000", // frontend URL
+    origin: ["http://localhost:3000", "https://lekota-virid.vercel.app"], // frontend URL
     credentials: true, // ✅ REQUIRED
-  })
+  }),
 );
 
 app.use(express.json());

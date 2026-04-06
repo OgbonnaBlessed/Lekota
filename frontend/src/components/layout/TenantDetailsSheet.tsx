@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import {
@@ -6,6 +8,15 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useUpdateTenantStatusMutation } from "@/redux/api/admin.api";
+import { Button } from "../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { useEffect, useState } from "react";
 
 type Tenant = {
   id: string;
@@ -23,6 +34,24 @@ type Props = {
 };
 
 const TenantDetailsSheet = ({ tenant, open, onOpenChange }: Props) => {
+  const [updateStatus] = useUpdateTenantStatusMutation();
+  const [tenantStatus, setTenantStatus] = useState<string | undefined>(
+    tenant?.status,
+  );
+
+  useEffect(() => {
+    setTenantStatus(tenant?.status);
+  }, [tenant?.status]);
+
+  const handleStatusChange = async (status: string) => {
+    if (!tenant) return;
+
+    await updateStatus({
+      tenantId: tenant.id || (tenant as any)._id,
+      status,
+    });
+  };
+
   if (!tenant) return null;
 
   return (
@@ -48,14 +77,47 @@ const TenantDetailsSheet = ({ tenant, open, onOpenChange }: Props) => {
             <div className="flex items-center gap-2">
               <span
                 className={`w-2 h-2 rounded-full ${
-                  tenant.status === "active"
+                  tenantStatus === "active"
                     ? "bg-green-500"
-                    : tenant.status === "suspended"
+                    : tenantStatus === "suspended"
                       ? "bg-yellow-500"
                       : "bg-red-500"
                 }`}
               />
-              <p className="capitalize">{tenant.status}</p>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="capitalize">
+                    {tenantStatus}
+                  </Button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setTenantStatus("active");
+                      handleStatusChange("active");
+                    }}
+                  >
+                    Active
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setTenantStatus("suspended");
+                      handleStatusChange("suspended");
+                    }}
+                  >
+                    Suspended
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setTenantStatus("deleted");
+                      handleStatusChange("deleted");
+                    }}
+                  >
+                    Deleted
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             <p className="font-medium capitalize">{tenant.subscription}</p>
           </div>

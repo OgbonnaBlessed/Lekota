@@ -3,28 +3,69 @@ import { Appointment } from "../appointments/appointment.model";
 import { sendNotification } from "../notifications/notification.service";
 import { User } from "../users/user.model";
 
+// ========================================
+// 👤 GET STAFF PROFILE
+// ========================================
+export const getStaffProfile = async (req: any, res: Response) => {
+  const user = await User.findById(req.user.id).select("-password");
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  const response = {
+    name: user.name,
+    email: user.email,
+    image: user.profile?.image,
+    location: user.profile?.location,
+    bio: user.profile?.bio,
+    service: user.profile?.service,
+    sub_service: user.profile?.sub_service,
+  };
+
+  res.json(response);
+};
 
 // ========================================
 // 👤 UPDATE STAFF PROFILE
 // ========================================
 export const updateStaffProfile = async (req: any, res: Response) => {
-  const updates = req.body;
+  const { name, email, service, sub_service, location, bio, image } = req.body;
+
+  const updateData: any = {};
+
+  // ✅ Top-level fields
+  if (name) updateData.name = name;
+  if (email) updateData.email = email;
+
+  // ✅ Nested profile fields
+  if (service) updateData["profile.service"] = service;
+  if (sub_service) updateData["profile.sub_service"] = sub_service;
+  if (location) updateData["profile.location"] = location;
+  if (bio) updateData["profile.bio"] = bio;
+  if (image) updateData["profile.image"] = image;
 
   const user = await User.findByIdAndUpdate(
     req.user.id,
-    { $set: { ...updates } },
-    { new: true }
+    { $set: updateData },
+    { new: true },
   );
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
 
   await sendNotification(
     req.user.id,
     "Profile Updated",
-    "Your profile was successfully updated"
+    "Your profile was successfully updated",
   );
 
-  res.json(user);
+  res.json({
+    message: "Profile updated successfully",
+    user,
+  });
 };
-
 
 // ========================================
 // 📅 GET STAFF SCHEDULES
@@ -36,7 +77,6 @@ export const getStaffSchedules = async (req: any, res: Response) => {
 
   res.json(schedules);
 };
-
 
 // ========================================
 // 🔍 GET SINGLE SCHEDULE
@@ -53,7 +93,6 @@ export const getSingleSchedule = async (req: any, res: Response) => {
 
   res.json(schedule);
 };
-
 
 // ========================================
 // ✅ UPDATE APPOINTMENT STATUS
@@ -80,7 +119,7 @@ export const updateAppointmentStatus = async (req: any, res: Response) => {
     await sendNotification(
       appointment.client.toString(),
       "Appointment Update",
-      `Your appointment was marked as ${status}`
+      `Your appointment was marked as ${status}`,
     );
   }
 

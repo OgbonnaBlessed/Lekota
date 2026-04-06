@@ -1,10 +1,19 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { ChevronDown, Plus, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  useGetAvailabilityQuery,
+  useSetAvailabilityMutation,
+} from "@/redux/api/staff.api";
 import { TimePicker } from "antd";
 import dayjs from "dayjs";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton/skeleton";
+import AvailabilitySkeleton from "@/components/ui/skeleton/AvailabitySkeleton";
 
 const { RangePicker } = TimePicker;
 
@@ -25,16 +34,26 @@ type DaySchedule = {
 };
 
 const Page = () => {
+  const [setAvailability] = useSetAvailabilityMutation();
+  const {
+    data: availabilityData,
+    isLoading,
+  } = useGetAvailabilityQuery({});
+
   const [timeZone, setTimeZone] = useState<string>("UTC +00:00");
   const [show, setShow] = useState<boolean>(false);
+  const [showSkeleton, setShowSkeleton] = useState<boolean>(true);
 
-  const [schedule, setSchedule] = useState<Record<string, DaySchedule>>(
+  const createDefaultSchedule = () =>
     Object.fromEntries(
       days.map((day) => [
         day,
         { enabled: false, start_time: "09:00", end_time: "18:00" },
       ]),
-    ),
+    );
+
+  const [schedule, setSchedule] = useState<Record<string, DaySchedule>>(
+    createDefaultSchedule(),
   );
 
   const ref = useRef<HTMLDivElement>(null);
@@ -67,6 +86,52 @@ const Page = () => {
       },
     }));
   };
+
+  useEffect(() => {
+    if (!availabilityData) return;
+
+    setSchedule((prev) => {
+      const updated = { ...createDefaultSchedule() };
+
+      availabilityData.forEach((item: any) => {
+        if (!item?.day) return;
+
+        updated[item.day] = {
+          enabled: true,
+          start_time: item.startTime || "09:00",
+          end_time: item.endTime || "18:00",
+        };
+      });
+
+      return updated;
+    });
+  }, [availabilityData]);
+
+  const handleSave = async () => {
+    const payload = Object.entries(schedule).map(([day, val]) => ({
+      day,
+      enabled: val.enabled,
+      start_time: val.start_time,
+      end_time: val.end_time,
+    }));
+
+    await setAvailability({
+      schedules: payload,
+      timeZone, // optional but good
+    });
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSkeleton(false);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading || showSkeleton) {
+    return <AvailabilitySkeleton />;
+  }
 
   return (
     <div className="flex flex-col gap-8">
@@ -190,6 +255,13 @@ const Page = () => {
           );
         })}
       </div>
+
+      <Button
+        onClick={handleSave}
+        className="w-fit bg-[#2D36E0] text-white px-6 py-5 rounded-lg"
+      >
+        Save Availability
+      </Button>
     </div>
   );
 };

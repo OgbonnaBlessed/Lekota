@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -15,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
+import { useEffect, useState } from "react";
 
 type User = {
   id: string;
@@ -33,6 +35,9 @@ type Props = {
 
 const UserDetailsheet = ({ user, open, onOpenChange }: Props) => {
   const [updateStatus] = useUpdateUserStatusMutation();
+  const [userStatus, setUserStatus] = useState<string | undefined>(
+    user?.status,
+  );
 
   const handleStatusChange = async (status: string) => {
     if (!user) return;
@@ -43,6 +48,12 @@ const UserDetailsheet = ({ user, open, onOpenChange }: Props) => {
     });
   };
 
+  useEffect(() => {
+    if (user?.status) {
+      setUserStatus(user?.status);
+    }
+  }, [user?.status]);
+
   if (!user) return null;
 
   return (
@@ -52,7 +63,90 @@ const UserDetailsheet = ({ user, open, onOpenChange }: Props) => {
           <SheetTitle className="text-xl!">User Details</SheetTitle>
         </SheetHeader>
 
-        <div className="flex gap-8 p-5 mt-6 text-sm">
+        <div className="mt-6 p-5">
+          <table>
+            <tbody className="w-full text-sm">
+              <tr>
+                <td className="flex items-start text-muted-foreground py-2 pr-6 font-medium align-top">
+                  User name
+                </td>
+                <td className="py-2">{user.name}</td>
+              </tr>
+              <tr>
+                <td className="flex items-start text-muted-foreground py-2 pr-6 font-medium align-top">
+                  Role
+                </td>
+                <td className="py-2">{user.role}</td>
+              </tr>
+              <tr>
+                <td className="flex items-start text-muted-foreground py-2 pr-6 font-medium align-top">
+                  Status
+                </td>
+                <td className="py-2">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        userStatus === "active"
+                          ? "bg-green-500"
+                          : userStatus === "suspended"
+                            ? "bg-yellow-500"
+                            : "bg-red-500"
+                      }`}
+                    />
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="capitalize cursor-pointer"
+                        >
+                          {userStatus}
+                        </Button>
+                      </DropdownMenuTrigger>
+
+                      <DropdownMenuContent>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setUserStatus("active");
+                            handleStatusChange("active");
+                          }}
+                        >
+                          Active
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setUserStatus("suspended");
+                            handleStatusChange("suspended");
+                          }}
+                        >
+                          Suspended
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setUserStatus("deleted");
+                            handleStatusChange("deleted");
+                          }}
+                        >
+                          Deleted
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td className="flex items-start text-muted-foreground py-2 pr-6 font-medium align-top">
+                  Organization
+                </td>
+                <td className="py-2">
+                  {(user as any)?.tenant?.organization || "—"}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* <div className="flex gap-8 p-5 mt-6 text-sm">
           <div className="flex flex-col gap-5">
             <p className="text-muted-foreground">User Name</p>
             <p className="text-muted-foreground">Role</p>
@@ -63,48 +157,8 @@ const UserDetailsheet = ({ user, open, onOpenChange }: Props) => {
           <div className="flex flex-col gap-5">
             <p className="font-medium">{user.name}</p>
             <p className="font-medium">{user.role}</p>
-            <div className="flex items-center gap-2">
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  user.status === "active"
-                    ? "bg-green-500"
-                    : user.status === "suspended"
-                      ? "bg-yellow-500"
-                      : "bg-red-500"
-                }`}
-              />
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="capitalize">
-                    {user.status}
-                  </Button>
-                </DropdownMenuTrigger>
-
-                <DropdownMenuContent>
-                  <DropdownMenuItem
-                    onClick={() => handleStatusChange("active")}
-                  >
-                    Active
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => handleStatusChange("suspended")}
-                  >
-                    Suspended
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => handleStatusChange("deleted")}
-                  >
-                    Deleted
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-            <p className="font-medium">
-              {(user as any)?.tenant?.organization || "—"}
-            </p>{" "}
           </div>
-        </div>
+        </div> */}
       </SheetContent>
     </Sheet>
   );
