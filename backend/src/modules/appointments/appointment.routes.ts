@@ -17,7 +17,7 @@ const router = Router();
 // ========================================
 // 📅 CREATE APPOINTMENT
 // ========================================
-router.post("/", protect([Role.CLIENT]), checkSubscription, createAppointment);
+router.post("/", protect([Role.CLIENT]), createAppointment);
 
 // Get all client appointments
 router.get("/", protect([Role.CLIENT]), getClientAppointments);

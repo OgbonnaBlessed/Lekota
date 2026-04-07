@@ -25,11 +25,11 @@ type Schedule = {
 const Page = () => {
   const params = useSearchParams();
   const staffId = params.get("staffId");
-  const serviceDuration = params.get("serviceDuration");
+  const serviceSchedules = params.get("serviceSchedules");
+  console.log("Service schedules:", serviceSchedules)
 
   const { data: staffData } = useGetStaffByIdQuery(staffId);
   const staff = staffData?.staff;
-  console.log("staff:", staff);
 
   const { data: availabilityData } = useGetStaffAvailabilityQuery(staffId);
   const availability = availabilityData || [];
@@ -80,7 +80,7 @@ const Page = () => {
       [key]: [...(prev[key] || []), [timeRange.start_time, timeRange.end_time]],
     }));
 
-    setShowAppointmentBox(false);
+    setShowReasonBox(true);
   };
 
   const handleCancel = () => {
@@ -90,7 +90,7 @@ const Page = () => {
   const handleFinalSubmit = async () => {
     if (timeRange?.start_time && serviceDuration) {
       await createAppointment({
-        staff,
+        staffId,
         date,
         startTime: timeRange?.start_time,
         endtime: timeRange?.start_time + serviceDuration,
@@ -99,9 +99,9 @@ const Page = () => {
       });
     }
 
-    setShowReasonBox(false);
-    setShowAppointmentBox(false);
-    router.push("/dashboard/client/appointments");
+    // setShowReasonBox(false);
+    // setShowAppointmentBox(false);
+    // router.push("/dashboard/client/appointments");
   };
 
   return (

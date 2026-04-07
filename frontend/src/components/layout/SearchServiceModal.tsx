@@ -13,6 +13,7 @@ const SearchServiceModal = ({ open, onOpenChange, service }: any) => {
   const [selectedSub, setSelectedSub] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   // const [search, setSearch] = useState("");
+  console.log("Service:", service);
 
   const filteredStaff = selectedSub
     ? staff.filter((s: any) => s.profile?.sub_service?.includes(selectedSub))
@@ -90,7 +91,7 @@ const SearchServiceModal = ({ open, onOpenChange, service }: any) => {
                   pathname: "./services/book-appointment",
                   query: {
                     staffId: user._id,
-                    serviceDuration: service.duration,
+                    serviceSchedules: service?.schedules,
                   },
                 }}
                 prefetch

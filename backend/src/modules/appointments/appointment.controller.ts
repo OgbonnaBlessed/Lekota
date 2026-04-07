@@ -35,6 +35,7 @@ export const createAppointment = async (req: any, res: Response) => {
     clientId: req.user.id,
   });
 
+  console.log(appointment);
   res.json(appointment);
 };
 

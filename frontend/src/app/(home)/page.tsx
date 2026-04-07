@@ -78,7 +78,7 @@ const page = () => {
             performance &mdash; all in one unified platform.
           </p>
 
-          <Link href="/dashboard/client/profile">
+          <Link href="/signin">
             <p className="sm:text-sm text-xs text-white bg-[#2D36E0] rounded-full p-4">
               Start free 10-day trial
             </p>
@@ -187,7 +187,7 @@ const page = () => {
           </p>
 
           <div className="flex justify-center lg:justify-start lg:mt-24">
-            <Link href="/dashboard">
+            <Link href="/signin">
               <p className="w-fit text-xs sm:text-sm text-white bg-[#2D36E0] rounded-full p-4">
                 Start free 10-day trial
               </p>
@@ -316,7 +316,7 @@ const page = () => {
                 </ul>
               </div>
 
-              <Link href="/dashboard">
+              <Link href="/signin">
                 <p className="w-full text-xs sm:text-sm text-white text-center bg-[#2D36E0] rounded-full p-4">
                   Start free 10-day trial
                 </p>

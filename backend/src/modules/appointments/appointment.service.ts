@@ -10,8 +10,8 @@ export const createAppointmentService = async ({
   startTime,
   duration,
   buffer,
-  service,
-  subService,
+  // service,
+  // subService,
   reason,
 }: any) => {
   // 🔹 1. Get day

@@ -9,7 +9,6 @@ import { useGetTenantServicesQuery } from "@/redux/api/staff.api";
 const Page = () => {
   const { data } = useGetTenantServicesQuery({});
   const services = data?.services || [];
-  console.log("Services:", services);
 
   const [open, setOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<any>(null);
