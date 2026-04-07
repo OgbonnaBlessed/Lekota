@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/refs */
 "use client";
 
@@ -5,13 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Command, CommandItem } from "@/components/ui/command";
 import Input from "@/components/ui/input";
 import Modal from "@/components/ui/modal";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import EditProfileSkeleton from "@/components/ui/skeleton/EditProfileSkeleton";
 import {
-  useGetProfileQuery,
-  useUpdateProfileMutation,
+  useGetStaffProfileQuery,
+  useGetTenantServicesQuery,
+  useUpdateStaffProfileMutation,
 } from "@/redux/api/staff.api";
-import { AnimatePresence, motion } from "framer-motion";
 import { ImageIcon, ImageUpIcon, Loader2, Plus, X } from "lucide-react";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
@@ -31,15 +36,18 @@ type Form = {
 };
 
 const Page = () => {
-  const { data, isLoading } = useGetProfileQuery({});
-  const [updateProfile] = useUpdateProfileMutation();
+  const { data, isLoading } = useGetStaffProfileQuery({});
+  const { data: servicesData } = useGetTenantServicesQuery({});
+  const services = servicesData?.services || [];
+  console.log(services);
+
+  const [updateProfile] = useUpdateStaffProfileMutation();
 
   const [show, setShow] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
   const [showAddSubserviceField, setShowAddSubserviceField] =
     useState<boolean>(false);
-  const [newSub, setNewSub] = useState("");
 
   const [form, setForm] = useState<Form>({
     image: null,
@@ -78,6 +86,8 @@ const Page = () => {
       initialRef.current = initial;
     }
   }, [data]);
+
+  const selectedService = services.find((s: any) => s.name === form.service);
 
   // ===============================
   // CHANGE DETECTION (BETTER)
@@ -137,21 +147,6 @@ const Page = () => {
 
     const data = await res.json();
     return data.secure_url;
-  };
-
-  // ===============================
-  // SUBSERVICE LOGIC
-  // ===============================
-  const addSubService = () => {
-    if (!newSub.trim()) return;
-
-    setForm((prev) => ({
-      ...prev,
-      sub_service: [...prev.sub_service, newSub.trim()],
-    }));
-
-    setNewSub("");
-    setShowAddSubserviceField(false);
   };
 
   const removeSubService = (index: number) => {
@@ -270,76 +265,111 @@ const Page = () => {
           onChange={handleChange}
         />
 
-        <div className="w-full flex flex-col lg:flex-row gap-4">
-          <Input
-            name="service"
-            label="Service"
-            placeholder="Enter your Service"
-            value={form.service}
-            onChange={handleChange}
-            className="w-full lg:w-1/2"
-          />
+        <div className="w-full flex flex-col lg:flex-row items-start gap-4">
+          <div className="flex flex-col gap-2 w-full lg:w-1/2">
+            <label className="text-sm font-medium text-[#6B7280]">
+              Service
+            </label>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="text-base border border-gray-300 rounded-xl px-4 py-3 text-left"
+                >
+                  {form.service || "Select service"}
+                </button>
+              </PopoverTrigger>
+
+              <PopoverContent className="w-full p-0">
+                <Command>
+                  {services.map((s: any) => (
+                    <CommandItem
+                      key={s._id}
+                      onSelect={() => {
+                        setForm((prev) => ({
+                          ...prev,
+                          service: s.name,
+                          sub_service: [], // reset subservices
+                        }));
+                      }}
+                    >
+                      {s.name}
+                    </CommandItem>
+                  ))}
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
+
           {/* SUB SERVICES */}
-          <AnimatePresence>
-            <div className="w-full lg:w-1/2 flex flex-col gap-2">
-              <label className="text-sm font-medium text-[#6B7280]">
-                Subservices
-              </label>
+          <div className="w-full lg:w-1/2 flex flex-col">
+            <label className="text-sm font-medium text-[#6B7280]">
+              Subservices
+            </label>
+            <Popover
+              open={showAddSubserviceField}
+              onOpenChange={setShowAddSubserviceField}
+            >
+              <div className="relative w-full min-h-12 flex flex-row border border-gray-300 rounded-xl gap-2 px-4 py-3 mt-2 overflow-x-auto no-scroll-bar">
+                {form.sub_service.length > 0 ? (
+                  <>
+                    {form.sub_service.map((item, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-1 px-2 py-1 bg-[#2D36E0]/10 text-xs text-[#2D36E0] rounded"
+                      >
+                        <span>{item}</span>
+                        <X
+                          size={12}
+                          className="cursor-pointer"
+                          onClick={() => removeSubService(index)}
+                        />
+                      </div>
+                    ))}
+                  </>
+                ) : (
+                  <span className="text-gray-400">Select a Subservice</span>
+                )}
 
-              <div className="relative w-full min-h-12 flex flex-row border border-gray-300 rounded-lg gap-2 p-2 mt-2 overflow-x-auto no-scroll-bar">
-                {form.sub_service.map((item, index) => (
+                <PopoverTrigger asChild>
                   <div
-                    key={index}
-                    className="flex items-center gap-1 px-2 py-1 bg-[#2D36E0]/10 text-xs text-[#2D36E0] rounded"
-                  >
-                    <span>{item}</span>
-                    <X
-                      size={12}
-                      className="cursor-pointer"
-                      onClick={() => removeSubService(index)}
-                    />
-                  </div>
-                ))}
-
-                {!showAddSubserviceField && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5, ease: "easeOut" }}
-                    onClick={() => setShowAddSubserviceField(true)}
+                    onClick={() => {
+                      if (!form.service) {
+                        toast.error("Select a service first");
+                        return;
+                      }
+                      setShowAddSubserviceField(true);
+                    }}
                     className="absolute right-3 top-1/2 -translate-y-1/2 bg-[#2D36E0] text-white p-2 rounded-full cursor-pointer"
                   >
                     <Plus size={14} />
-                  </motion.div>
-                )}
+                  </div>
+                </PopoverTrigger>
               </div>
 
-              {showAddSubserviceField && (
-                <motion.div
-                  initial={{ opacity: 0, y: -5, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -5, scale: 0.95 }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
-                  className="flex items-center gap-2 mt-2"
-                >
-                  <input
-                    value={newSub}
-                    onChange={(e) => setNewSub(e.target.value)}
-                    placeholder="Add subservice"
-                    className="border px-3 py-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#2D36E0] focus:border-transparent placeholder:text-gray-400 transition-all duration-500 ease-in-out"
-                  />
-                  <Button
-                    type="button"
-                    onClick={addSubService}
-                    className="bg-[#2D36E0] p-4!"
-                  >
-                    Add
-                  </Button>
-                </motion.div>
-              )}
-            </div>
-          </AnimatePresence>
+              <PopoverContent align="end" className="w-full p-0">
+                <Command>
+                  {selectedService?.subServices?.map((sub: string) => (
+                    <CommandItem
+                      key={sub}
+                      onSelect={() => {
+                        if (!form.sub_service.includes(sub)) {
+                          setForm((prev) => ({
+                            ...prev,
+                            sub_service: [...prev.sub_service, sub],
+                          }));
+                        }
+                        setShowAddSubserviceField(false);
+                      }}
+                    >
+                      {sub}
+                    </CommandItem>
+                  ))}
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
 
         <Input
@@ -372,7 +402,7 @@ const Page = () => {
             <PopoverTrigger asChild>
               <button
                 type="button"
-                className="border px-3 py-2 rounded-lg text-left"
+                className="border rounded-xl px-4 py-3 text-left"
               >
                 {form.gender || "Select gender"}
               </button>

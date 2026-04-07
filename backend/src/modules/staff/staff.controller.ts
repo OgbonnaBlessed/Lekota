@@ -2,6 +2,29 @@ import { Response } from "express";
 import { Appointment } from "../appointments/appointment.model";
 import { sendNotification } from "../notifications/notification.service";
 import { User } from "../users/user.model";
+import { Service } from "../services/service.model";
+import mongoose from "mongoose";
+
+export const getStaffById = async (req: any, res: Response) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
+      message: "Invalid staff ID",
+    });
+  }
+
+  const staff = await User.findById(id).select("-password");
+
+  if (!staff) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  res.json({
+    message: "Staff fetched successfully",
+    staff,
+  });
+};
 
 // ========================================
 // 👤 GET STAFF PROFILE
@@ -20,6 +43,7 @@ export const getStaffProfile = async (req: any, res: Response) => {
     location: user.profile?.location,
     bio: user.profile?.bio,
     service: user.profile?.service,
+    phone: user.profile?.phone,
     sub_service: user.profile?.sub_service,
   };
 
@@ -47,8 +71,37 @@ export const updateStaffProfile = async (req: any, res: Response) => {
   if (name) updateData.name = name;
   if (email) updateData.email = email;
 
-  if (service) updateData["profile.service"] = service;
-  if (sub_service) updateData["profile.sub_service"] = sub_service;
+  if (service) {
+    const validService = await Service.findOne({
+      name: service,
+      tenant: req.user.tenant,
+      status: "active",
+    });
+
+    if (!validService) {
+      return res.status(400).json({
+        message: "Invalid service selected",
+      });
+    }
+
+    updateData["profile.service"] = service;
+
+    // Validate subservices
+    if (sub_service) {
+      const invalidSub = sub_service.find(
+        (sub: string) => !validService.subServices.includes(sub),
+      );
+
+      if (invalidSub) {
+        return res.status(400).json({
+          message: `Invalid subservice: ${invalidSub}`,
+        });
+      }
+
+      updateData["profile.sub_service"] = sub_service;
+    }
+  }
+
   if (location) updateData["profile.location"] = location;
   if (phone) updateData["profile.phone"] = phone;
   if (bio) updateData["profile.bio"] = bio;
@@ -88,11 +141,42 @@ export const updateStaffProfile = async (req: any, res: Response) => {
 // 📅 GET STAFF SCHEDULES
 // ========================================
 export const getStaffSchedules = async (req: any, res: Response) => {
-  const schedules = await Appointment.find({
-    staff: req.user.id,
-  }).populate("client", "name email");
+  const { type } = req.query; // upcoming | week | past
 
-  res.json(schedules);
+  const now = new Date();
+
+  let filter: any = {
+    staff: req.user.id,
+  };
+
+  if (type === "upcoming") {
+    filter.date = { $gte: now };
+  }
+
+  if (type === "past") {
+    filter.date = { $lt: now };
+  }
+
+  if (type === "week") {
+    const startOfWeek = new Date();
+    const endOfWeek = new Date();
+
+    endOfWeek.setDate(startOfWeek.getDate() + 7);
+
+    filter.date = {
+      $gte: startOfWeek,
+      $lte: endOfWeek,
+    };
+  }
+
+  const schedules = await Appointment.find(filter)
+    .sort({ date: 1, startTime: 1 })
+    .populate("client", "name email profile.image");
+
+  res.json({
+    message: "Schedules fetched successfully",
+    schedules,
+  });
 };
 
 // ========================================
@@ -102,7 +186,9 @@ export const getSingleSchedule = async (req: any, res: Response) => {
   const schedule = await Appointment.findOne({
     _id: req.params.id,
     staff: req.user.id,
-  }).populate("client", "name email");
+  })
+    .populate("client", "name email profile.image")
+    .lean();
 
   if (!schedule) {
     return res.status(404).json({ message: "Not found" });

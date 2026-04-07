@@ -18,6 +18,7 @@ export const baseApi = createApi({
   tagTypes: [
     "User",
     "Appointments",
+    "Appointment",
     "Search",
     "Slots",
     "Tenants",
@@ -26,6 +27,8 @@ export const baseApi = createApi({
     "Payments",
     "Availability",
     "Profile",
+    "Schedules",
+    "Schedule",
   ],
 
   endpoints: () => ({}),

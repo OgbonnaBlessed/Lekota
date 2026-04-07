@@ -2,7 +2,7 @@ import { Response } from "express";
 import { Availability } from "./availability.model";
 
 export const setAvailability = async (req: any, res: Response) => {
-  const { schedules } = req.body
+  const { schedules } = req.body;
 
   // Remove old
   await Availability.deleteMany({ staff: req.user.id });
@@ -27,6 +27,15 @@ export const setAvailability = async (req: any, res: Response) => {
 export const getAvailability = async (req: any, res: Response) => {
   const availability = await Availability.find({
     staff: req.user.id,
+  });
+
+  res.json(availability);
+};
+
+// GET STAFF AVAILABILITY (PUBLIC)
+export const getStaffAvailability = async (req: any, res: Response) => {
+  const availability = await Availability.find({
+    staff: req.params.staffId,
   });
 
   res.json(availability);

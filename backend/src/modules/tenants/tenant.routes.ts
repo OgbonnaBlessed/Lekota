@@ -24,8 +24,12 @@ router.get("/users", protect([Role.TENANT_ADMIN]), getUsers);
 router.post("/users/create", protect([Role.TENANT_ADMIN]), createUser);
 router.patch("/users/status", protect([Role.TENANT_ADMIN]), updateUserStatus);
 router.post("/services", protect([Role.TENANT_ADMIN]), createService);
-router.get("/services", protect([Role.TENANT_ADMIN]), getServices);
-router.patch("/services/status", protect([Role.TENANT_ADMIN]), updateServiceStatus);
+router.get("/services", protect([Role.TENANT_ADMIN, Role.STAFF, Role.CLIENT]), getServices);
+router.patch(
+  "/services/status",
+  protect([Role.TENANT_ADMIN]),
+  updateServiceStatus,
+);
 router.patch("/services", protect([Role.TENANT_ADMIN]), updateService);
 router.get("/analytics", protect([Role.TENANT_ADMIN]), getTenantThroughput);
 

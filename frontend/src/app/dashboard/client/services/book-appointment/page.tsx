@@ -1,13 +1,20 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { Calendar, CalendarDayButton } from "@/components/ui/calendar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { useCreateAppointmentMutation } from "@/redux/api/appointment.api";
+import { useGetStaffAvailabilityQuery } from "@/redux/api/client.api";
+import { useGetStaffByIdQuery } from "@/redux/api/staff.api";
 import { TimePicker } from "antd";
 import { AlarmClock, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 const { RangePicker } = TimePicker;
 
 type Schedule = {
@@ -16,9 +23,25 @@ type Schedule = {
 };
 
 const Page = () => {
+  const params = useSearchParams();
+  const staffId = params.get("staffId");
+  const serviceDuration = params.get("serviceDuration");
+
+  const { data: staffData } = useGetStaffByIdQuery(staffId);
+  const staff = staffData?.staff;
+  console.log("staff:", staff);
+
+  const { data: availabilityData } = useGetStaffAvailabilityQuery(staffId);
+  const availability = availabilityData || [];
+
+  const router = useRouter();
+
+  const [createAppointment] = useCreateAppointmentMutation();
   const [showAppointmentBox, setShowAppointmentBox] = useState(false);
   const [showReasonBox, setShowReasonBox] = useState(false);
   const [timeRange, setTimeRange] = useState<Schedule | null>(null);
+  const [type, setType] = useState<"onsite" | "virtual">("onsite");
+  const [reason, setReason] = useState<string>("");
   const [appointments, setAppointments] = useState<
     Record<string, [string, string][]>
   >({});
@@ -31,10 +54,26 @@ const Page = () => {
       ),
   );
 
+  const availableDays = availability.map((a: any) => a.day);
+
+  const selectedDay = date?.toLocaleDateString("en-US", {
+    weekday: "short",
+  });
+
+  const dayAvailability = availability.find((a: any) => a.day === selectedDay);
+
   const handleSave = () => {
     if (!date || !timeRange) return;
 
     const key = date.toDateString();
+
+    if (
+      timeRange.start_time < dayAvailability.startTime ||
+      timeRange.start_time > dayAvailability.endTime
+    ) {
+      toast.error("Outside staff availability");
+      return;
+    }
 
     setAppointments((prev) => ({
       ...prev,
@@ -46,6 +85,23 @@ const Page = () => {
 
   const handleCancel = () => {
     setShowReasonBox(true);
+  };
+
+  const handleFinalSubmit = async () => {
+    if (timeRange?.start_time && serviceDuration) {
+      await createAppointment({
+        staff,
+        date,
+        startTime: timeRange?.start_time,
+        endtime: timeRange?.start_time + serviceDuration,
+        reason,
+        type,
+      });
+    }
+
+    setShowReasonBox(false);
+    setShowAppointmentBox(false);
+    router.push("/dashboard/client/appointments");
   };
 
   return (
@@ -62,7 +118,7 @@ const Page = () => {
           Pick appointment date
         </h1>
         <p className="text-sm md:text-base">
-          Set an appointment date with Jay Baxter
+          Set an appointment date with {staff?.name}
         </p>
       </div>
       <div className="flex flex-col lg:flex-row items-start gap-5">
@@ -78,6 +134,12 @@ const Page = () => {
                   setShowAppointmentBox(true);
                   setShowReasonBox(false);
                 }
+              }}
+              disabled={(date) => {
+                const day = date.toLocaleDateString("en-US", {
+                  weekday: "short",
+                });
+                return !availableDays.includes(day);
               }}
               numberOfMonths={1}
               className="[--cell-size:--spacing(10)] md:[--cell-size:--spacing(20)]"
@@ -118,12 +180,12 @@ const Page = () => {
             <Card className="w-[18rem] max-w-full h-fit p-0">
               <CardContent className="p-0">
                 <div className="w-full flex flex-col gap-5 p-5">
-                  <div className="flex flex-col gap-1">
-                    <h2>Jay&apos;s availability</h2>
-                    <p className="text-xs text-[#2D36E0]">
-                      9:00 - 18:00 (UTC +00:00)
-                    </p>
-                  </div>
+                  <h2>{staff?.name}&apos;s availability</h2>
+                  <p className="text-xs text-[#2D36E0]">
+                    {dayAvailability
+                      ? `${dayAvailability.startTime} - ${dayAvailability.endTime}`
+                      : "Unavailable"}
+                  </p>
 
                   <div className="flex flex-col gap-2 text-sm">
                     <div className="flex items-center gap-1 text-gray-500">
@@ -149,12 +211,18 @@ const Page = () => {
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1">
+                    <div
+                      onClick={() => setType("onsite")}
+                      className="flex items-center gap-1"
+                    >
                       <span className="w-2 h-2 bg-[#2D36E0] rounded-full" />
                       <p>On site</p>
                     </div>
 
-                    <div className="flex items-center gap-1">
+                    <div
+                      onClick={() => setType("virtual")}
+                      className="flex items-center gap-1"
+                    >
                       <span className="w-2 h-2 bg-red-500 rounded-full" />
                       <p>Virtual</p>
                     </div>
@@ -185,10 +253,15 @@ const Page = () => {
                 <div className="text-gray-500 bg-gray-200 p-5">Reason</div>
                 <div className="relative flex flex-col justify-between px-2.5 py-2">
                   <Textarea
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
                     placeholder="Add reason..."
                     className="min-h-52 border-none resize-none outline-none focus:ring-0 focus-visible:ring-0"
                   />
-                  <Button className="w-fit self-end bg-[#2D36E0] rounded-none p-4">
+                  <Button
+                    onClick={handleFinalSubmit}
+                    className="w-fit self-end bg-[#2D36E0] rounded-none p-4"
+                  >
                     Send
                   </Button>
                 </div>

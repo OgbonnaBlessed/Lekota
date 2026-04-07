@@ -1,7 +1,25 @@
 import { Response } from "express";
-import { Appointment } from "../appointments/appointment.model";
 import { sendNotification } from "../notifications/notification.service";
 import { User } from "../users/user.model";
+
+export const getClientProfile = async (req: any, res: Response) => {
+  const user = await User.findById(req.user.id).select("-password");
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  const response = {
+    name: user.name,
+    email: user.email,
+    image: user.profile?.image,
+    location: user.profile?.location,
+    bio: user.profile?.bio,
+    phone: user.profile?.phone,
+  };
+
+  res.json(response);
+};
 
 // ========================================
 // UPDATE CLIENT PROFILE
@@ -22,86 +40,4 @@ export const updateClientProfile = async (req: any, res: Response) => {
   );
 
   res.json(user);
-};
-
-// ========================================
-// 📅 GET ALL CLIENT APPOINTMENTS
-// ========================================
-export const getClientAppointments = async (req: any, res: Response) => {
-  const appointments = await Appointment.find({
-    client: req.user.id,
-  }).populate("staff", "name email");
-
-  res.json(appointments);
-};
-
-// ========================================
-// 🔍 GET SINGLE APPOINTMENT
-// ========================================
-export const getSingleAppointment = async (req: any, res: Response) => {
-  const appointment = await Appointment.findOne({
-    _id: req.params.id,
-    client: req.user.id,
-  }).populate("staff", "name email");
-
-  if (!appointment) {
-    return res.status(404).json({ message: "Not found" });
-  }
-
-  res.json(appointment);
-};
-
-// ========================================
-// ❌ CANCEL APPOINTMENT
-// ========================================
-export const cancelAppointment = async (req: any, res: Response) => {
-  const { id, reason } = req.body;
-
-  const appointment = await Appointment.findOne({
-    _id: id,
-    client: req.user.id,
-  });
-
-  if (!appointment) {
-    return res.status(404).json({ message: "Not found" });
-  }
-
-  appointment.status = "cancelled";
-  appointment.cancelReason = reason;
-
-  await appointment.save();
-
-  // notify staff
-  if (appointment.staff) {
-    await sendNotification(
-      appointment.staff.toString(),
-      "Appointment Cancelled",
-      "A client cancelled an appointment",
-    );
-  }
-
-  res.json({ message: "Cancelled" });
-};
-
-// ========================================
-// RATE APPOINTMENT
-// ========================================
-export const rateAppointment = async (req: any, res: Response) => {
-  const { id, rating, remarks } = req.body;
-
-  const appointment = await Appointment.findOne({
-    _id: id,
-    client: req.user.id,
-  });
-
-  if (!appointment) {
-    return res.status(404).json({ message: "Not found" });
-  }
-
-  appointment.rating = rating;
-  appointment.remarks = remarks;
-
-  await appointment.save();
-
-  res.json(appointment);
 };

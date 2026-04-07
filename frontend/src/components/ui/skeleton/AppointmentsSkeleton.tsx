@@ -91,21 +91,6 @@ const CardSkeleton = () => (
   </div>
 );
 
-/* ================= PAGINATION ================= */
-const PaginationSkeleton = () => (
-  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-    <Skeleton className="h-4 w-48" />
-
-    <div className="flex items-center gap-2">
-      <Skeleton className="h-8 w-12 rounded-md" />
-      <Skeleton className="h-8 w-8 rounded-md" />
-      <Skeleton className="h-8 w-8 rounded-md" />
-      <Skeleton className="h-8 w-8 rounded-md" />
-      <Skeleton className="h-8 w-12 rounded-md" />
-    </div>
-  </div>
-);
-
 /* ================= MAIN ================= */
 export default function AppointmentsSkeleton() {
   return (
@@ -113,7 +98,6 @@ export default function AppointmentsSkeleton() {
       <HeaderSkeleton />
       <TableSkeleton />
       <CardSkeleton />
-      <PaginationSkeleton />
     </div>
   );
 }

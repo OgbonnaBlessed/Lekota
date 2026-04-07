@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { baseApi } from "./base.api";
 import { toast } from "@/lib/toast";
 
@@ -7,6 +8,35 @@ export const appointmentApi = baseApi.injectEndpoints({
     getAppointments: builder.query({
       query: () => "/appointments",
       providesTags: ["Appointments"],
+
+      async onQueryStarted(_, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          toast.success(data?.message || "Fetched appointments successfully");
+        } catch (err: any) {
+          const message =
+            err?.error?.data?.message || "Failed to fetch appointment";
+
+          toast.error(message);
+        }
+      },
+    }),
+
+    getSingleAppointment: builder.query({
+      query: (id) => `/appointments/${id}`,
+      providesTags: ["Appointment"],
+
+      async onQueryStarted(_, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          toast.success(data?.message || "Fetched appointment successfully");
+        } catch (err: any) {
+          const message =
+            err?.error?.data?.message || "Failed to fetch appointment";
+
+          toast.error(message);
+        }
+      },
     }),
 
     // CREATE
@@ -21,10 +51,13 @@ export const appointmentApi = baseApi.injectEndpoints({
 
       async onQueryStarted(_, { queryFulfilled }) {
         try {
-          await queryFulfilled;
-          toast.success("Appointment booked");
-        } catch {
-          toast.error("Booking failed");
+          const { data } = await queryFulfilled;
+          toast.success(data?.message || "Appointment booked successfully");
+        } catch (err: any) {
+          const message =
+            err?.error?.data?.message || "Failed to book appointment";
+
+          toast.error(message);
         }
       },
     }),
@@ -41,10 +74,13 @@ export const appointmentApi = baseApi.injectEndpoints({
 
       async onQueryStarted(_, { queryFulfilled }) {
         try {
-          await queryFulfilled;
-          toast.success("Appointment cancelled");
-        } catch {
-          toast.error("Cancel failed");
+          const { data } = await queryFulfilled;
+          toast.success(data?.message || "Appointment cancelled successfully");
+        } catch (err: any) {
+          const message =
+            err?.error?.data?.message || "Failed to cancel appointment";
+
+          toast.error(message);
         }
       },
     }),
@@ -61,10 +97,13 @@ export const appointmentApi = baseApi.injectEndpoints({
 
       async onQueryStarted(_, { queryFulfilled }) {
         try {
-          await queryFulfilled;
-          toast.success("Rescheduled successfully");
-        } catch {
-          toast.error("Reschedule failed");
+          const { data } = await queryFulfilled;
+          toast.success(data?.message || "Rescheduled appointment successfully");
+        } catch (err: any) {
+          const message =
+            err?.error?.data?.message || "Failed to reschedule appointment";
+
+          toast.error(message);
         }
       },
     }),
@@ -73,6 +112,7 @@ export const appointmentApi = baseApi.injectEndpoints({
 
 export const {
   useGetAppointmentsQuery,
+  useGetSingleAppointmentQuery,
   useCreateAppointmentMutation,
   useCancelAppointmentMutation,
   useRescheduleAppointmentMutation,

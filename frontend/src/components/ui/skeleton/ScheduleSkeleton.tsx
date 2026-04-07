@@ -1,6 +1,5 @@
 "use client";
 
-
 /* ================= SHIMMER WRAPPER ================= */
 const Skeleton = ({ className }: { className?: string }) => (
   <div
@@ -93,7 +92,7 @@ const PaginationSkeleton = () => (
 );
 
 /* ================= MAIN PAGE SKELETON ================= */
-export default function PageSkeleton() {
+const PageSkeleton = () => {
   return (
     <div className="w-full flex flex-col gap-5">
       {/* HEADER */}
@@ -117,4 +116,6 @@ export default function PageSkeleton() {
       </div>
     </div>
   );
-}
+};
+
+export { TableSkeleton, CardSkeleton, PaginationSkeleton, PageSkeleton };

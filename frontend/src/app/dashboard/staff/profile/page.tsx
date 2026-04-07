@@ -1,14 +1,15 @@
 "use client";
 
 import ProfileSkeleton from "@/components/ui/skeleton/ProfileSkeleton";
-import { useGetProfileQuery } from "@/redux/api/staff.api";
+import { useGetStaffProfileQuery } from "@/redux/api/staff.api";
 import { Pencil } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const Page = () => {
-  const { data, isLoading } = useGetProfileQuery({});
+  const { data, isLoading } = useGetStaffProfileQuery({});
   const user = data;
+  console.log("user:", user)
 
   const [showSkeleton, setShowSkeleton] = useState<boolean>(true);
 
@@ -47,7 +48,7 @@ const Page = () => {
           <p>Location</p>
         </div>
 
-        <div>
+        <div className="flex flex-col items-end">
           <h2>{user?.phone || "Not set"}</h2>
           <p>Phone</p>
         </div>

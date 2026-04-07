@@ -3,14 +3,13 @@ import {
   createAppointment,
   cancelAppointment,
   rescheduleAppointment,
+  getClientAppointments,
+  getSingleAppointment,
+  rateAppointment,
 } from "./appointment.controller";
 
 import { protect } from "@/middleware/auth.middleware";
 import { checkSubscription } from "@/middleware/subscription.middleware";
-import {
-  getClientAppointments,
-  getSingleAppointment,
-} from "../client/client.controller";
 import { Role } from "@/types";
 
 const router = Router();
@@ -35,5 +34,6 @@ router.patch("/cancel", protect([Role.CLIENT]), cancelAppointment);
 // 🔄 RESCHEDULE APPOINTMENT
 // ========================================
 router.patch("/reschedule", protect([Role.CLIENT]), rescheduleAppointment);
+router.patch("/rate", protect([Role.CLIENT]), rateAppointment);
 
 export default router;

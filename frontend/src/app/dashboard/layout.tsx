@@ -72,9 +72,12 @@ export default function DashboardLayout({
           <button
             onClick={async () => {
               try {
-                const res = await fetch("http://localhost:5000/api/payments/initialize", {
-                  method: "POST",
-                });
+                const res = await fetch(
+                  "http://localhost:5000/api/payments/initialize",
+                  {
+                    method: "POST",
+                  },
+                );
                 const data = await res.json();
                 window.location.href = data?.data?.authorization_url;
               } catch (err) {
@@ -107,9 +110,11 @@ export default function DashboardLayout({
 
         {/* Topbar */}
         <div className="md:pl-6">
-          <div className="w-full flex flex-col md:flex-row gap-4 items-center justify-between border-b p-4">
+          <div
+            className={`w-full flex ${role === "staff" ? "flex-row" : "flex-col md:flex-row"} gap-4 items-center justify-between border-b py-4 pr-4`}
+          >
             <h2
-              className={`self-start text-lg font-medium capitalize pl-6 md:pl-0 ${(role === "staff" || role === "client") && "hidden md:block"}`}
+              className={`self-start text-lg font-medium capitalize pl-6 md:pl-0 ${role === "client" && "hidden md:block"}`}
             >
               {role.replace("_", " ")}
             </h2>

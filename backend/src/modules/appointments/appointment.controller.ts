@@ -2,6 +2,33 @@ import { Response } from "express";
 import { Appointment } from "./appointment.model";
 import { createAppointmentService } from "./appointment.service";
 
+// ========================================
+// 📅 GET ALL CLIENT APPOINTMENTS
+// ========================================
+export const getClientAppointments = async (req: any, res: Response) => {
+  const appointments = await Appointment.find({
+    client: req.user.id,
+  }).populate("staff", "name email");
+
+  res.json(appointments);
+};
+
+// ========================================
+// 🔍 GET SINGLE APPOINTMENT
+// ========================================
+export const getSingleAppointment = async (req: any, res: Response) => {
+  const appointment = await Appointment.findOne({
+    _id: req.params.id,
+    client: req.user.id,
+  }).populate("staff", "name email");
+
+  if (!appointment) {
+    return res.status(404).json({ message: "Not found" });
+  }
+
+  res.json(appointment);
+};
+
 export const createAppointment = async (req: any, res: Response) => {
   const appointment = await createAppointmentService({
     ...req.body,
@@ -46,8 +73,8 @@ export const rescheduleAppointment = async (req: any, res: Response) => {
     startTime: newStartTime,
     duration: 30,
     buffer: 10,
-    service: old.service,
-    subService: old.subService,
+    // service: old.service,
+    // subService: old.subService,
     reason: old.reason,
   });
 
@@ -55,4 +82,27 @@ export const rescheduleAppointment = async (req: any, res: Response) => {
   await old.save();
 
   res.json(newAppointment);
+};
+
+// ========================================
+// RATE APPOINTMENT
+// ========================================
+export const rateAppointment = async (req: any, res: Response) => {
+  const { id, rating, remarks } = req.body;
+
+  const appointment = await Appointment.findOne({
+    _id: id,
+    client: req.user.id,
+  });
+
+  if (!appointment) {
+    return res.status(404).json({ message: "Not found" });
+  }
+
+  appointment.rating = rating;
+  appointment.remarks = remarks;
+
+  await appointment.save();
+
+  res.json(appointment);
 };

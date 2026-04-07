@@ -111,7 +111,7 @@ const UserDetailsheet = ({ user, open, onOpenChange }: Props) => {
                             handleStatusChange("active");
                           }}
                         >
-                          Active
+                          Activate
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => {
@@ -119,7 +119,7 @@ const UserDetailsheet = ({ user, open, onOpenChange }: Props) => {
                             handleStatusChange("suspended");
                           }}
                         >
-                          Suspended
+                          Suspend
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => {
@@ -127,7 +127,7 @@ const UserDetailsheet = ({ user, open, onOpenChange }: Props) => {
                             handleStatusChange("deleted");
                           }}
                         >
-                          Deleted
+                          Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

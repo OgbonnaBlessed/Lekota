@@ -250,7 +250,7 @@ const ServiceDetailsSheet = ({ service, open, onOpenChange }: any) => {
                       handleStatusChange("active");
                     }}
                   >
-                    Active
+                    Activate
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => {
@@ -258,7 +258,7 @@ const ServiceDetailsSheet = ({ service, open, onOpenChange }: any) => {
                       handleStatusChange("suspended");
                     }}
                   >
-                    Suspended
+                    Suspend
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => {
@@ -266,7 +266,7 @@ const ServiceDetailsSheet = ({ service, open, onOpenChange }: any) => {
                       handleStatusChange("deleted");
                     }}
                   >
-                    Deleted
+                    Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

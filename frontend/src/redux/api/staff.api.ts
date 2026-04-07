@@ -4,12 +4,16 @@ import { toast } from "sonner";
 
 export const staffApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getProfile: builder.query({
+    getStaffById: builder.query({
+      query: (id) => `/staff/${id}`,
+    }),
+
+    getStaffProfile: builder.query({
       query: () => "/staff/profile",
       providesTags: ["Profile"],
     }),
 
-    updateProfile: builder.mutation({
+    updateStaffProfile: builder.mutation({
       query: (data) => ({
         url: "/staff/profile",
         method: "PATCH",
@@ -49,12 +53,31 @@ export const staffApi = baseApi.injectEndpoints({
       query: () => "/availability",
       providesTags: ["Availability"],
     }),
+
+    getSchedules: builder.query({
+      query: (type) => `/staff/schedules?type=${type}`,
+      providesTags: ["Schedules"],
+    }),
+
+    getSingleSchedule: builder.query({
+      query: (id) => `/staff/schedules/${id}`,
+      providesTags: ["Schedule"],
+    }),
+
+    getTenantServices: builder.query({
+      query: () => "/tenants/services",
+      providesTags: ["Services"],
+    }),
   }),
 });
 
 export const {
-  useGetProfileQuery,
-  useUpdateProfileMutation,
+  useGetStaffByIdQuery,
+  useGetStaffProfileQuery,
+  useUpdateStaffProfileMutation,
   useSetAvailabilityMutation,
   useGetAvailabilityQuery,
+  useGetSchedulesQuery,
+  useGetSingleScheduleQuery,
+  useGetTenantServicesQuery,
 } = staffApi;

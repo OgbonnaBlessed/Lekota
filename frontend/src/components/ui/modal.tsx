@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-expressions */
 "use client";
 
 import Image from "next/image";
@@ -62,18 +61,21 @@ const Modal = ({
 
               {body && <div className="w-2xs max-w-full text-sm">{body}</div>}
 
-              {href && (
-                <Link
-                  href={href}
-                  onClick={() => {
-                    onClose;
-                    onClick;
-                  }}
-                >
+              {href && !onClick && (
+                <Link href={href} onClick={onClose}>
                   <button className="w-full bg-[#2D36E0] hover:opacity-90 transition text-white text-sm rounded-lg py-3 px-12">
                     {link}
                   </button>
                 </Link>
+              )}
+
+              {!href && onClick && (
+                <button
+                  onClick={onClick}
+                  className="w-full bg-[#2D36E0] hover:opacity-90 transition text-white text-sm rounded-lg py-3 px-12"
+                >
+                  {link}
+                </button>
               )}
             </div>
           </motion.div>

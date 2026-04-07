@@ -1,5 +1,12 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import {
+  CardSkeleton,
+  PaginationSkeleton,
+  TableSkeleton,
+} from "@/components/ui/skeleton/ScheduleSkeleton";
 import {
   Table,
   TableBody,
@@ -9,9 +16,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useGetSchedulesQuery } from "@/redux/api/staff.api";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type User = {
   image: string;
@@ -38,332 +46,6 @@ type Pagination = {
   startItem: number;
   endItem: number;
   total: number;
-};
-
-const schedules_data: Record<"upcoming" | "week" | "past", Schedule[]> = {
-  upcoming: [
-    {
-      id: 1,
-      user: { image: "/banner.png", name: "David Clinton" },
-      date: "Mon, 22nd June, 2026",
-      scheduled_time: { start_time: "9:00 am", end_time: "9:40 am" },
-      status: "pending",
-    },
-    {
-      id: 2,
-      user: { image: "/banner.png", name: "Sarah Johnson" },
-      date: "Mon, 22nd June, 2026",
-      scheduled_time: { start_time: "10:00 am", end_time: "10:40 am" },
-      status: "completed",
-    },
-    {
-      id: 3,
-      user: { image: "/banner.png", name: "Michael Brown" },
-      date: "Tue, 23rd June, 2026",
-      scheduled_time: { start_time: "11:00 am", end_time: "11:40 am" },
-      status: "pending",
-    },
-    {
-      id: 4,
-      user: { image: "/banner.png", name: "Emily Davis" },
-      date: "Tue, 23rd June, 2026",
-      scheduled_time: { start_time: "12:00 pm", end_time: "12:40 pm" },
-      status: "cancelled",
-    },
-    {
-      id: 5,
-      user: { image: "/banner.png", name: "Daniel Wilson" },
-      date: "Wed, 24th June, 2026",
-      scheduled_time: { start_time: "1:00 pm", end_time: "1:40 pm" },
-      status: "pending",
-    },
-    {
-      id: 6,
-      user: { image: "/banner.png", name: "Sophia Martinez" },
-      date: "Wed, 24th June, 2026",
-      scheduled_time: { start_time: "2:00 pm", end_time: "2:40 pm" },
-      status: "completed",
-    },
-    {
-      id: 7,
-      user: { image: "/banner.png", name: "James Anderson" },
-      date: "Thu, 25th June, 2026",
-      scheduled_time: { start_time: "9:00 am", end_time: "9:40 am" },
-      status: "pending",
-    },
-    {
-      id: 8,
-      user: { image: "/banner.png", name: "Olivia Thomas" },
-      date: "Thu, 25th June, 2026",
-      scheduled_time: { start_time: "10:00 am", end_time: "10:40 am" },
-      status: "completed",
-    },
-    {
-      id: 9,
-      user: { image: "/banner.png", name: "William Taylor" },
-      date: "Fri, 26th June, 2026",
-      scheduled_time: { start_time: "11:00 am", end_time: "11:40 am" },
-      status: "pending",
-    },
-    {
-      id: 10,
-      user: { image: "/banner.png", name: "Ava Moore" },
-      date: "Fri, 26th June, 2026",
-      scheduled_time: { start_time: "12:00 pm", end_time: "12:40 pm" },
-      status: "cancelled",
-    },
-    {
-      id: 11,
-      user: { image: "/banner.png", name: "Ethan Jackson" },
-      date: "Sat, 27th June, 2026",
-      scheduled_time: { start_time: "1:00 pm", end_time: "1:40 pm" },
-      status: "pending",
-    },
-    {
-      id: 12,
-      user: { image: "/banner.png", name: "Isabella White" },
-      date: "Sat, 27th June, 2026",
-      scheduled_time: { start_time: "2:00 pm", end_time: "2:40 pm" },
-      status: "completed",
-    },
-    {
-      id: 13,
-      user: { image: "/banner.png", name: "Liam Harris" },
-      date: "Sun, 28th June, 2026",
-      scheduled_time: { start_time: "9:00 am", end_time: "9:40 am" },
-      status: "pending",
-    },
-    {
-      id: 14,
-      user: { image: "/banner.png", name: "Mia Clark" },
-      date: "Sun, 28th June, 2026",
-      scheduled_time: { start_time: "10:00 am", end_time: "10:40 am" },
-      status: "completed",
-    },
-    {
-      id: 15,
-      user: { image: "/banner.png", name: "Noah Lewis" },
-      date: "Sun, 28th June, 2026",
-      scheduled_time: { start_time: "11:00 am", end_time: "11:40 am" },
-      status: "pending",
-    },
-  ],
-
-  week: [
-    {
-      id: 16,
-      user: { image: "/banner.png", name: "Emma Walker" },
-      date: "Mon, 15th June, 2026",
-      scheduled_time: { start_time: "9:00 am", end_time: "9:40 am" },
-      status: "completed",
-    },
-    {
-      id: 17,
-      user: { image: "/banner.png", name: "Lucas Hall" },
-      date: "Mon, 15th June, 2026",
-      scheduled_time: { start_time: "10:00 am", end_time: "10:40 am" },
-      status: "pending",
-    },
-    {
-      id: 18,
-      user: { image: "/banner.png", name: "Charlotte Allen" },
-      date: "Tue, 16th June, 2026",
-      scheduled_time: { start_time: "11:00 am", end_time: "11:40 am" },
-      status: "completed",
-    },
-    {
-      id: 19,
-      user: { image: "/banner.png", name: "Henry Young" },
-      date: "Tue, 16th June, 2026",
-      scheduled_time: { start_time: "12:00 pm", end_time: "12:40 pm" },
-      status: "cancelled",
-    },
-    {
-      id: 20,
-      user: { image: "/banner.png", name: "Amelia King" },
-      date: "Wed, 17th June, 2026",
-      scheduled_time: { start_time: "1:00 pm", end_time: "1:40 pm" },
-      status: "pending",
-    },
-    {
-      id: 21,
-      user: { image: "/banner.png", name: "Benjamin Wright" },
-      date: "Wed, 17th June, 2026",
-      scheduled_time: { start_time: "2:00 pm", end_time: "2:40 pm" },
-      status: "completed",
-    },
-    {
-      id: 22,
-      user: { image: "/banner.png", name: "Harper Scott" },
-      date: "Thu, 18th June, 2026",
-      scheduled_time: { start_time: "9:00 am", end_time: "9:40 am" },
-      status: "pending",
-    },
-    {
-      id: 23,
-      user: { image: "/banner.png", name: "Elijah Green" },
-      date: "Thu, 18th June, 2026",
-      scheduled_time: { start_time: "10:00 am", end_time: "10:40 am" },
-      status: "completed",
-    },
-    {
-      id: 24,
-      user: { image: "/banner.png", name: "Abigail Adams" },
-      date: "Fri, 19th June, 2026",
-      scheduled_time: { start_time: "11:00 am", end_time: "11:40 am" },
-      status: "pending",
-    },
-    {
-      id: 25,
-      user: { image: "/banner.png", name: "Logan Baker" },
-      date: "Fri, 19th June, 2026",
-      scheduled_time: { start_time: "12:00 pm", end_time: "12:40 pm" },
-      status: "cancelled",
-    },
-    {
-      id: 26,
-      user: { image: "/banner.png", name: "Ella Nelson" },
-      date: "Sat, 20th June, 2026",
-      scheduled_time: { start_time: "1:00 pm", end_time: "1:40 pm" },
-      status: "completed",
-    },
-    {
-      id: 27,
-      user: { image: "/banner.png", name: "Jacob Carter" },
-      date: "Sat, 20th June, 2026",
-      scheduled_time: { start_time: "2:00 pm", end_time: "2:40 pm" },
-      status: "pending",
-    },
-    {
-      id: 28,
-      user: { image: "/banner.png", name: "Scarlett Mitchell" },
-      date: "Sun, 21st June, 2026",
-      scheduled_time: { start_time: "9:00 am", end_time: "9:40 am" },
-      status: "completed",
-    },
-    {
-      id: 29,
-      user: { image: "/banner.png", name: "Jack Perez" },
-      date: "Sun, 21st June, 2026",
-      scheduled_time: { start_time: "10:00 am", end_time: "10:40 am" },
-      status: "pending",
-    },
-    {
-      id: 30,
-      user: { image: "/banner.png", name: "Grace Roberts" },
-      date: "Sun, 21st June, 2026",
-      scheduled_time: { start_time: "11:00 am", end_time: "11:40 am" },
-      status: "completed",
-    },
-  ],
-
-  past: [
-    {
-      id: 31,
-      user: { image: "/banner.png", name: "Samuel Turner" },
-      date: "Mon, 1st June, 2026",
-      scheduled_time: { start_time: "9:00 am", end_time: "9:40 am" },
-      status: "completed",
-    },
-    {
-      id: 32,
-      user: { image: "/banner.png", name: "Chloe Phillips" },
-      date: "Mon, 1st June, 2026",
-      scheduled_time: { start_time: "10:00 am", end_time: "10:40 am" },
-      status: "completed",
-    },
-    {
-      id: 33,
-      user: { image: "/banner.png", name: "Alexander Campbell" },
-      date: "Tue, 2nd June, 2026",
-      scheduled_time: { start_time: "11:00 am", end_time: "11:40 am" },
-      status: "completed",
-    },
-    {
-      id: 34,
-      user: { image: "/banner.png", name: "Lily Parker" },
-      date: "Tue, 2nd June, 2026",
-      scheduled_time: { start_time: "12:00 pm", end_time: "12:40 pm" },
-      status: "cancelled",
-    },
-    {
-      id: 35,
-      user: { image: "/banner.png", name: "Matthew Evans" },
-      date: "Wed, 3rd June, 2026",
-      scheduled_time: { start_time: "1:00 pm", end_time: "1:40 pm" },
-      status: "completed",
-    },
-    {
-      id: 36,
-      user: { image: "/banner.png", name: "Zoe Edwards" },
-      date: "Wed, 3rd June, 2026",
-      scheduled_time: { start_time: "2:00 pm", end_time: "2:40 pm" },
-      status: "completed",
-    },
-    {
-      id: 37,
-      user: { image: "/banner.png", name: "Sebastian Collins" },
-      date: "Thu, 4th June, 2026",
-      scheduled_time: { start_time: "9:00 am", end_time: "9:40 am" },
-      status: "completed",
-    },
-    {
-      id: 38,
-      user: { image: "/banner.png", name: "Hannah Stewart" },
-      date: "Thu, 4th June, 2026",
-      scheduled_time: { start_time: "10:00 am", end_time: "10:40 am" },
-      status: "completed",
-    },
-    {
-      id: 39,
-      user: { image: "/banner.png", name: "David Sanchez" },
-      date: "Fri, 5th June, 2026",
-      scheduled_time: { start_time: "11:00 am", end_time: "11:40 am" },
-      status: "completed",
-    },
-    {
-      id: 40,
-      user: { image: "/banner.png", name: "Natalie Morris" },
-      date: "Fri, 5th June, 2026",
-      scheduled_time: { start_time: "12:00 pm", end_time: "12:40 pm" },
-      status: "cancelled",
-    },
-    {
-      id: 41,
-      user: { image: "/banner.png", name: "Christopher Rogers" },
-      date: "Sat, 6th June, 2026",
-      scheduled_time: { start_time: "1:00 pm", end_time: "1:40 pm" },
-      status: "completed",
-    },
-    {
-      id: 42,
-      user: { image: "/banner.png", name: "Victoria Reed" },
-      date: "Sat, 6th June, 2026",
-      scheduled_time: { start_time: "2:00 pm", end_time: "2:40 pm" },
-      status: "completed",
-    },
-    {
-      id: 43,
-      user: { image: "/banner.png", name: "Andrew Cook" },
-      date: "Sun, 7th June, 2026",
-      scheduled_time: { start_time: "9:00 am", end_time: "9:40 am" },
-      status: "completed",
-    },
-    {
-      id: 44,
-      user: { image: "/banner.png", name: "Samantha Morgan" },
-      date: "Sun, 7th June, 2026",
-      scheduled_time: { start_time: "10:00 am", end_time: "10:40 am" },
-      status: "completed",
-    },
-    {
-      id: 45,
-      user: { image: "/banner.png", name: "Joseph Bell" },
-      date: "Sun, 7th June, 2026",
-      scheduled_time: { start_time: "11:00 am", end_time: "11:40 am" },
-      status: "completed",
-    },
-  ],
 };
 
 const ITEMS_PER_PAGE = 10;
@@ -442,7 +124,7 @@ const ScheduleTable = ({ data }: { data: Schedule[] }) => (
             </TableCell>
 
             <TableCell className="text-center">
-              <Link href="./schedules/view-schedule">
+              <Link href={`./schedules/${item.id}`}>
                 <p className="text-[#2D36E0]">View schedule</p>
               </Link>
             </TableCell>
@@ -457,7 +139,10 @@ const ScheduleTable = ({ data }: { data: Schedule[] }) => (
 const ScheduleCards = ({ data }: { data: Schedule[] }) => (
   <div className="md:hidden space-y-4">
     {data.map((item) => (
-      <div key={item.id} className="shadow shadow-gray-300 rounded-xl p-4 bg-white space-y-3">
+      <div
+        key={item.id}
+        className="shadow shadow-gray-300 rounded-xl p-4 bg-white space-y-3"
+      >
         <div className="flex items-center gap-2 font-semibold">
           <div className="relative w-8 h-8 rounded-full overflow-hidden">
             <Image
@@ -479,7 +164,7 @@ const ScheduleCards = ({ data }: { data: Schedule[] }) => (
           <Status status={item.status} />
         </div>
 
-        <Link href="./schedules/view-schedule">
+        <Link href={`./schedules/${item.id}`}>
           <p className="text-[#2D36E0]">View schedule</p>
         </Link>
       </div>
@@ -546,26 +231,83 @@ const Section = ({
   page: number;
   setPage: (n: number) => void;
 }) => {
-  const data = schedules_data[type];
+  const { data, isLoading } = useGetSchedulesQuery(type);
+
+  const [showSkeleton, setShowSkeleton] = useState(true);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+
+    if (!isLoading) {
+      timer = setTimeout(() => {
+        setShowSkeleton(false);
+      }, 5000); // 5 seconds
+    } else {
+      setShowSkeleton(true);
+    }
+
+    return () => clearTimeout(timer);
+  }, [isLoading]);
+
+  const schedules = data?.schedules || [];
+
+  const mapped = schedules.map((item: any) => ({
+    id: item._id,
+    user: {
+      image: item.client?.profile?.image || "/avatar.png",
+      name: item.client?.name,
+    },
+    date: new Date(item.date).toDateString(),
+    scheduled_time: {
+      start_time: item.startTime,
+      end_time: item.endTime,
+    },
+    status: item.status,
+  }));
+
   const { totalPages, paginatedData, startItem, endItem } = usePagination(
-    data,
+    mapped,
     page,
   );
 
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(mapped.length / ITEMS_PER_PAGE));
+
+    if (page > maxPage) {
+      setPage(maxPage);
+    }
+  }, [mapped.length, page, setPage]);
+
+  const isEmpty = !isLoading && mapped.length === 0;
+
   return (
     <div className="flex flex-col gap-5">
-      <ScheduleTable data={paginatedData} />
-      <ScheduleCards data={paginatedData} />
+      {showSkeleton ? (
+        <>
+          <TableSkeleton />
+          <CardSkeleton />
+          <PaginationSkeleton />
+        </>
+      ) : isEmpty ? (
+        <div className="w-full min-h-52 flex items-center justify-center text-sm text-gray-500">
+          <p>You currently have no schedule</p>
+        </div>
+      ) : (
+        <>
+          <ScheduleTable data={paginatedData} />
+          <ScheduleCards data={paginatedData} />
 
-      {data.length > ITEMS_PER_PAGE && (
-        <Pagination
-          page={page}
-          setPage={setPage}
-          totalPages={totalPages}
-          startItem={startItem}
-          endItem={endItem}
-          total={data.length}
-        />
+          {mapped.length > ITEMS_PER_PAGE && (
+            <Pagination
+              page={page}
+              setPage={setPage}
+              totalPages={totalPages}
+              startItem={startItem}
+              endItem={endItem}
+              total={mapped.length}
+            />
+          )}
+        </>
       )}
     </div>
   );

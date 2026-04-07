@@ -6,9 +6,6 @@ const AppointmentSchema = new Schema(
     staff: { type: Schema.Types.ObjectId, ref: "User" },
     client: { type: Schema.Types.ObjectId, ref: "User" },
 
-    service: String,
-    subService: String,
-
     date: Date,
     startTime: String,
     endTime: String,

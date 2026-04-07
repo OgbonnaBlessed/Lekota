@@ -41,7 +41,7 @@ const roleMap: any = {
 };
 
 const CreateUserModal = ({ open, onOpenChange }: Props) => {
-  const [createUser, { isLoading }] = useCreateUserMutation();
+  const [createUser, { isLoading, isError }] = useCreateUserMutation();
   const [show, setShow] = useState<boolean>(false);
 
   const [form, setForm] = useState({
@@ -60,7 +60,10 @@ const CreateUserModal = ({ open, onOpenChange }: Props) => {
       email: form.email,
       role: roleMap[form.role],
     });
-    setShow(true);
+
+    if (!isError) {
+      setShow(true);
+    }
 
     setForm({ name: "", email: "", role: "" });
     onOpenChange(false);
