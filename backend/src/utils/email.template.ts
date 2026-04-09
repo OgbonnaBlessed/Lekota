@@ -20,12 +20,12 @@ export const baseTemplate = (content: string) => {
   `;
 };
 
-export const welcomeEmail = (name: string, password: string) => {
+export const welcomeEmail = (name: string, password: string, sub: string) => {
   return baseTemplate(`
     <h3>Hello ${name},</h3>
     <p>Welcome to <b>Lekota</b> 🎉</p>
 
-    <p>Your account has been created successfully.</p>
+    <p>${sub}</p>
 
     <div style="background:#f1f5f9; padding:12px; border-radius:6px;">
       <p><b>Temporary Password:</b> ${password}</p>

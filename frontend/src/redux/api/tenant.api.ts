@@ -150,7 +150,33 @@ export const tenantApi = baseApi.injectEndpoints({
       query: () => ({
         url: "/payments/initialize",
         method: "POST",
+        provideTags: ["Payments"],
       }),
+
+      async onQueryStarted(_, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          toast.success(data?.message);
+        } catch (err: any) {
+          toast.error(
+            err?.error?.data?.message || "Payment initialization failed",
+          );
+        }
+      },
+    }),
+
+    verifyPayment: builder.query({
+      query: (reference) => `/payments/verify?reference=${reference}`,
+      providesTags: ["Payments"],
+
+      async onQueryStarted(_, { queryFulfilled }) {
+        try {
+          const {data} = await queryFulfilled;
+          toast.success(data?.message);
+        } catch (err: any) {
+          toast.error(err?.error?.data?.message || "Failed to fetch payments");
+        }
+      },
     }),
 
     getPayments: builder.query({
@@ -179,5 +205,6 @@ export const {
   useCreateUserMutation,
   useUpdateUserStatusMutation,
   useInitializePaymentMutation,
+  useLazyVerifyPaymentQuery,
   useGetPaymentsQuery,
 } = tenantApi;

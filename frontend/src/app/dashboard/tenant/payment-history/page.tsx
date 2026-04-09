@@ -23,6 +23,7 @@ import PaymentDetailsSheet from "@/components/layout/PaymentDetailsSheet";
 import { useGetPaymentsQuery } from "@/redux/api/tenant.api";
 import { MoreHorizontal } from "lucide-react";
 import PaymentsSkeleton from "@/components/ui/skeleton/PaymentsSkeleton";
+import formatDate from "@/utils/format-date";
 
 type Payment = {
   _id: string;
@@ -79,7 +80,7 @@ const Page = () => {
             <Table>
               <TableHeader className="bg-gray-100">
                 <TableRow>
-                  <TableHead className="p-5">Invoice</TableHead>
+                  <TableHead className="p-5">Reference</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Payment Date</TableHead>
                   <TableHead className="text-center">Actions</TableHead>
@@ -92,9 +93,9 @@ const Page = () => {
                     <TableCell className="font-medium p-5">
                       {payment.reference}
                     </TableCell>
-                    <TableCell>{payment.amount}</TableCell>
+                    <TableCell>₦{payment.amount}</TableCell>
                     <TableCell>
-                      {new Date(payment.paidAt).toLocaleDateString()}
+                      {formatDate(payment.paidAt)}
                     </TableCell>
 
                     <TableCell className="text-center">
@@ -128,7 +129,7 @@ const Page = () => {
             {paginatedPayments.map((payment: Payment) => (
               <div
                 key={payment._id}
-                className="shadow shadow-gray-300 rounded-xl p-4 bg-white space-y-3"
+                className="text-sm shadow shadow-gray-300 rounded-xl p-4 bg-white space-y-3"
               >
                 <div className="flex justify-between items-start">
                   <div className="font-semibold">{payment.reference}</div>
@@ -156,10 +157,10 @@ const Page = () => {
                 <div className="text-sm space-y-1">
                   <div>
                     <span className="font-medium">Amount:</span>{" "}
-                    {payment.amount}
+                    ₦{payment.amount}
                   </div>
                   <p>
-                    <span className="font-medium">Date:</span> {payment.paidAt}
+                    <span className="font-medium">Date:</span> {formatDate(payment.paidAt)}
                   </p>
                 </div>
               </div>

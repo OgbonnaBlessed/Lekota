@@ -6,6 +6,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import formatDate from "@/utils/format-date";
 import { ArrowDownToLineIcon, Banknote, Link } from "lucide-react";
 
 type Payment = {
@@ -43,7 +44,7 @@ const PaymentDetailsSheet = ({ payment, open, onOpenChange }: Props) => {
             <div className="flex flex-col gap-5 shadow shadow-[#ABABAB] rounded-lg p-2 md:p-5 w-1/2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Link size={18} />
-                <p>Invoice</p>
+                <p>Reference</p>
               </div>
               <p className="text-lg">{payment.reference}</p>
             </div>
@@ -57,7 +58,7 @@ const PaymentDetailsSheet = ({ payment, open, onOpenChange }: Props) => {
           </div>
 
           <div className="flex flex-col gap-5 shadow shadow-[#ABABAB] rounded-lg p-5">
-            <h2 className="text-lg">Invoice Details</h2>
+            <h2 className="text-lg">Payment Details</h2>
 
             <tbody className="w-full text-sm">
               <tr className="w-full flex max-md:flex-col items-start gap-1 py-2">
@@ -67,18 +68,16 @@ const PaymentDetailsSheet = ({ payment, open, onOpenChange }: Props) => {
                 <td className="md:w-3/5">{payment.billedTo}</td>
               </tr>
               <tr className="w-full flex max-md:flex-col items-start gap-1 py-2">
-                <td className="md:w-2/5 text-muted-foreground font-medium text-nowrap">
-                  Billed Details:
+                <td className="md:w-2/5 text-muted-foreground font-medium">
+                  Currency:
                 </td>
-                <td className="md:w-3/5">{payment.billedDetails}</td>
-              </tr>
-              <tr className="w-full flex max-md:flex-col items-start gap-1 py-2">
-                <td className="md:w-2/5 text-muted-foreground font-medium">Currency:</td>
                 <td className="md:w-3/5">{payment.currency}</td>
               </tr>
               <tr className="w-full flex max-md:flex-col items-start gap-1 py-2">
-                <td className="md:w-2/5 text-muted-foreground font-medium">Date:</td>
-                <td className="md:w-3/5">{payment.paidAt}</td>
+                <td className="md:w-2/5 text-muted-foreground font-medium">
+                  Date:
+                </td>
+                <td className="md:w-3/5">{formatDate(payment.paidAt)}</td>
               </tr>
             </tbody>
           </div>

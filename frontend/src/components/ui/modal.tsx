@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "./button";
 
 type ModalProps = {
   header?: string;
@@ -69,13 +70,13 @@ const Modal = ({
                 </Link>
               )}
 
-              {!href && onClick && (
-                <button
+              {href && onClick && (
+                <Button
                   onClick={onClick}
-                  className="w-full bg-[#2D36E0] hover:opacity-90 transition text-white text-sm rounded-lg py-3 px-12"
+                  className="w-full bg-[#2D36E0] hover:opacity-90 transition text-white text-sm rounded-lg py-6 px-12"
                 >
                   {link}
-                </button>
+                </Button>
               )}
             </div>
           </motion.div>

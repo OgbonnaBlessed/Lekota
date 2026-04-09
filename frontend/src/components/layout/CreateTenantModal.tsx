@@ -12,6 +12,7 @@ import Input from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Modal from "../ui/modal";
 import { useCreateTenantMutation } from "@/redux/api/admin.api";
+import { Loader2 } from "lucide-react";
 
 type Props = {
   open: boolean;
@@ -94,7 +95,8 @@ const CreateTenantModal = ({ open, onOpenChange }: Props) => {
               }
               className="w-full text-base py-6! mt-5 cursor-pointer bg-[#2D36E0] disabled:bg-[#2D36E0]/40"
             >
-              Create Tenant
+              {isLoading && <Loader2 size={14} className="animate-spin" />}
+              {isLoading ? "Creating Tenant..." : "Create Tenant"}
             </Button>
           </div>
         </DialogContent>

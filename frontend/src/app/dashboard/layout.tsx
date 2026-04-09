@@ -123,7 +123,7 @@ export default function DashboardLayout({
         </div>
 
         {/* Page Content */}
-        <div className="p-6">{children}</div>
+        <div className="h-full p-6">{children}</div>
       </main>
     </SidebarProvider>
   );

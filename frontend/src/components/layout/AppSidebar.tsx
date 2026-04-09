@@ -31,6 +31,7 @@ export function AppSidebar({ role }: { role: Role }) {
   const [initializePayment] = useInitializePaymentMutation();
   const dispatch = useDispatch();
   const user = useAppSelector((state) => state.auth.user);
+  console.log("Tenant admin:", user);
   const [show, setShow] = useState<boolean>(false);
   const [pay, setPay] = useState<boolean>(false);
   const pathname = usePathname();
@@ -279,7 +280,7 @@ export function AppSidebar({ role }: { role: Role }) {
         link="Proceed to Payment"
         visible={pay}
         onClose={() => {setPay(false)}}
-        onClick={handlePayment}
+        onClick={() => handlePayment()}
       />
     </>
   );

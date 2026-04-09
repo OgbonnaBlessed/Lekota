@@ -63,7 +63,11 @@ export const createTenant = async (req: Request, res: Response) => {
     await sendEmail(
       email,
       "Welcome to Lekota",
-      welcomeEmail(name, rawPassword),
+      welcomeEmail(
+        name,
+        rawPassword,
+        "Your tenant account has been created successfully.",
+      ),
     );
 
     return res.status(201).json({
@@ -132,7 +136,11 @@ export const createUser = async (req: any, res: Response) => {
     await sendEmail(
       email,
       "Welcome to Lekota",
-      welcomeEmail(name, rawPassword),
+      welcomeEmail(
+        name,
+        rawPassword,
+        "Your account has been created successfully.",
+      ),
     );
 
     return res.status(201).json({
