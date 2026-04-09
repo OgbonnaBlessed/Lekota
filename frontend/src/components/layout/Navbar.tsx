@@ -2,7 +2,7 @@
 
 import { useAppSelector } from "@/redux/hooks";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu } from "lucide-react";
+import { X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
@@ -74,34 +74,99 @@ const Navbar = () => {
 
         {/* Mobile Menu Icon */}
         <div
-          className="block sm:hidden cursor-pointer"
+          className="w-5 flex flex-col items-end gap-1.25 sm:hidden cursor-pointer"
           onClick={() => setOpen((prev) => !prev)}
         >
-          <Menu />
+          {["1", "2", "3"].map((_bar, i) => (
+            <div
+              key={i}
+              className={`${i !== 1 ? "w-full" : "w-[80%]"} h-0.5 bg-black rounded-full`}
+            />
+          ))}
         </div>
 
-        {/* Dropdown */}
-        <AnimatePresence mode="popLayout">
+        <AnimatePresence>
           {open && (
-            <motion.div
-              className="flex flex-col items-center gap-4 bg-white shadow-xl rounded-xl p-4 absolute top-16 right-0"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <p className="text-sm">Features</p>
-              <p className="text-sm">Pricing</p>
-              <Link href="/legal" className="text-sm">
-                Legal
-              </Link>
-              <p className="text-sm">Statement</p>
+            <>
+              {/* OVERLAY */}
+              <motion.div
+                className="fixed min-h-screen inset-0 bg-black/40 z-40"
+                initial={{ x: "-100%" }}
+                animate={{ x: 0, transition: { duration: 0.5 } }}
+                exit={{
+                  x: "-100%",
+                  transition: { delay: 0.4, duration: 0.5 },
+                }}
+                onClick={() => setOpen(false)}
+              />
 
-              <Link href="/signup">
-                <p className="text-xs text-white bg-[#2D36E0] rounded-full p-4">
-                  Get started
-                </p>
-              </Link>
-            </motion.div>
+              {/* SIDEBAR */}
+              <motion.div
+                ref={menuRef}
+                className="fixed top-0 left-0 min-h-screen w-[75%] max-w-xs bg-white z-50 shadow-2xl flex flex-col p-6"
+                initial={{ x: "-100%" }}
+                animate={{
+                  x: 0,
+                  transition: {
+                    delay: 0.4,
+                    duration: 0.5,
+                  },
+                }}
+                exit={{
+                  x: "-100%",
+                  transition: {
+                    duration: 0.5,
+                  },
+                }}
+              >
+                {/* HEADER */}
+                <div className="flex items-center justify-between mb-8">
+                  <p className="text-lg text-[#121212]">Lekota</p>
+                  <button
+                    onClick={() => setOpen(false)}
+                    className="bg-gray-200 rounded-full p-2"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+
+                {/* LINKS */}
+                <div className="flex flex-col items-center gap-6 text-sm">
+                  <Link href="/#features" onClick={() => setOpen(false)}>
+                    Features
+                  </Link>
+                  <Link href="/#pricing" onClick={() => setOpen(false)}>
+                    Pricing
+                  </Link>
+                  <Link href="/legal" onClick={() => setOpen(false)}>
+                    Legal
+                  </Link>
+                  <Link href="/#statement" onClick={() => setOpen(false)}>
+                    Statement
+                  </Link>
+                </div>
+
+                {/* CTA */}
+                <div className="mx-auto mt-auto">
+                  <Link
+                    href={
+                      role === "admin"
+                        ? "/dashboard/admin/overview"
+                        : role === "tenant_admin"
+                          ? "/dashboard/tenant/overview"
+                          : role === "staff"
+                            ? "/dashboard/staff/profile"
+                            : "/dashboard/client/profile"
+                    }
+                    onClick={() => setOpen(false)}
+                  >
+                    <div className="w-fit text-sm text-center text-white bg-[#2D36E0] rounded-full p-4">
+                      {role ? "Go to Dashboard" : "Get Started"}
+                    </div>
+                  </Link>
+                </div>
+              </motion.div>
+            </>
           )}
         </AnimatePresence>
       </div>
