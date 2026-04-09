@@ -2,33 +2,50 @@ import { Availability } from "../availability/availability.model";
 import { Appointment } from "../appointments/appointment.model";
 import { timeToMinutes, minutesToTime } from "@/utils/time.util";
 
+// ===============================
+// TYPES
+// ===============================
+type Slot = {
+  startTime: string;
+  endTime: string;
+};
+
+type GenerateSlotsParams = {
+  staffId: string;
+  date: string;
+  duration: number; // minutes
+};
+
 export const generateTimeSlots = async ({
   staffId,
   date,
-  duration, // total minutes (service + buffer)
-}: {
-  staffId: string;
-  date: string;
-  duration: number;
-}) => {
+  duration,
+}: GenerateSlotsParams): Promise<Slot[]> => {
+  // ===============================
+  // GET DAY NAME
+  // ===============================
   const day = new Date(date)
     .toLocaleDateString("en-US", { weekday: "long" })
     .toLowerCase();
 
-  // 1️⃣ Get staff availability for that day
+  // ===============================
+  // GET AVAILABILITY
+  // ===============================
   const availability = await Availability.findOne({
     staff: staffId,
     day,
   });
 
-  if (!availability) return [];
-
-  if (!availability.startTime || !availability.endTime) return [];
+  if (!availability || !availability.startTime || !availability.endTime) {
+    return [];
+  }
 
   const start = timeToMinutes(availability.startTime);
   const end = timeToMinutes(availability.endTime);
 
-  // 2️⃣ Get existing bookings for that day
+  // ===============================
+  // GET BOOKINGS
+  // ===============================
   const bookings = await Appointment.find({
     staff: staffId,
     date: new Date(date),
@@ -38,18 +55,22 @@ export const generateTimeSlots = async ({
   const bookedSlots = bookings
     .filter((b) => b.startTime && b.endTime)
     .map((b) => ({
-      start: timeToMinutes(b.startTime!),
-      end: timeToMinutes(b.endTime!),
+      start: timeToMinutes(b.startTime as string),
+      end: timeToMinutes(b.endTime as string),
     }));
 
-  // 3️⃣ Generate slots
-  const slots = [];
+  // ===============================
+  // GENERATE SLOTS
+  // ===============================
+  const slots: Slot[] = [];
 
   for (let time = start; time + duration <= end; time += duration) {
     const slotStart = time;
     const slotEnd = time + duration;
 
-    // 4️⃣ Check overlap
+    // ===============================
+    // CHECK OVERLAP
+    // ===============================
     const isBooked = bookedSlots.some(
       (b) =>
         (slotStart >= b.start && slotStart < b.end) ||
