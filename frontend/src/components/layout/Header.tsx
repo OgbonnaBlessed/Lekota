@@ -97,8 +97,8 @@ const Header = () => {
           <Link
             href={
               role === "staff"
-                ? "../notifications"
-                : "../notifications"
+                ? "/dashboard/staff/notifications"
+                : "/dashboard/client/notifications"
             }
             className="relative"
           >

@@ -11,6 +11,7 @@ import {
   loginSchema,
   passwordSchema,
 } from "./auth.validation";
+import { forgotPasswordEmail } from "@/utils/email.template";
 
 const sendAuthResponse = (res: Response, user: any, message: string) => {
   const token = generateToken(user);
@@ -132,16 +133,14 @@ export const forgotPassword = async (req: Request, res: Response) => {
 
   const resetURL = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
 
-  if (user.email) {
+  if (user.email && user.name) {
     await sendEmail(
       user.email,
-      "Password Reset Instructions",
-      `
-        <h2>Password Reset</h2>
-        <p>Click the link below to reset your password:</p>
-        <a href="${resetURL}">${resetURL}</a>
-        <p>This link expires in 15 minutes.</p>
-      `,
+      "Reset Your Lekota Password",
+      forgotPasswordEmail({
+        name: user.name,
+        resetURL,
+      }),
     );
   }
 

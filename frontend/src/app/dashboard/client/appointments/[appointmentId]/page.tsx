@@ -107,19 +107,19 @@ const Page = () => {
         </div>
       </div>
 
-      {appointment?.mode === "virtual" ? (
         <div className="flex flex-col gap-1">
           <h3>Meeting Link</h3>
-          <p className="text-sm text-[#2D36E0]">
+          <p className="text-sm text-[#2D36E0] cursor-pointer">
             {appointment?.meetingLink || "N/A"}
           </p>
         </div>
-      ) : (
         <div className="flex flex-col gap-1">
           <h3>Mode</h3>
           <p className="text-sm capitalize">{appointment?.type}</p>
         </div>
-      )}
+      {/* {appointment?.type === "Virtual" ? (
+      ) : (
+      )} */}
 
       <div className="flex flex-col gap-1">
         <h3>Duration</h3>

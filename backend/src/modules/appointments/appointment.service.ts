@@ -3,6 +3,11 @@ import { Appointment } from "./appointment.model";
 import { addMinutes } from "@/utils/booking.util";
 import { sendNotification } from "../notifications/notification.service";
 import { Service } from "../services/service.model";
+import {
+  bookingNotificationEmail,
+  clientBookingConfirmationEmail,
+} from "@/utils/email.template";
+import { User } from "../users/user.model";
 
 export const createAppointmentService = async ({
   staffId,
@@ -120,17 +125,40 @@ export const createAppointmentService = async ({
       reason,
     });
 
-    await sendNotification(
-      staffId,
-      "New Booking",
-      "A client booked a session with you",
-    );
+    const client = await User.findById(clientId);
+    const staff = await User.findById(staffId);
 
-    await sendNotification(
-      clientId,
-      "Booking Confirmed",
-      "Your appointment has been scheduled",
-    );
+    if (client?.name) {
+      await sendNotification({
+        userId: staffId,
+        title: `${client?.name} just booked an appointment`,
+        body: `${client?.name} booked ${subService} at ${startTime}. ${reason}.`,
+        emailData: {
+          subject: "New Appointment Booking",
+          html: bookingNotificationEmail({
+            clientName: client?.name,
+            service,
+            subService,
+            startTime,
+            reason,
+          }),
+        },
+      });
+    }
+
+    await sendNotification({
+      userId: clientId,
+      title: "Booking Confirmed",
+      body: `You booked an appointment with ${staff?.name} for ${subService} to commence by ${startTime} on ${date}. Ensure to make yourself available for the appointment. Thank you.`,
+      emailData: {
+        subject: "Appointment Confirmed",
+        html: clientBookingConfirmationEmail({
+          service,
+          subService,
+          startTime,
+        }),
+      },
+    });
 
     return {
       success: true,

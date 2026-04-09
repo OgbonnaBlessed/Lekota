@@ -21,6 +21,6 @@ export const connectMongoDB = async () => {
   } catch (error) {
     // Log connection errors and stop the app
     console.error("MongoDB connection failed", error);
-    process.exit(1);
+    // process.exit(1);
   }
 };

@@ -33,11 +33,11 @@ export const updateClientProfile = async (req: any, res: Response) => {
     { new: true },
   );
 
-  await sendNotification(
-    req.user.id,
-    "Profile Updated",
-    "Your profile was updated successfully",
-  );
+  await sendNotification({
+    userId: req.user.id,
+    title: "Profile Updated",
+    body: "Your profile was updated successfully",
+  });
 
   res.json(user);
 };

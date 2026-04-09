@@ -1,18 +1,16 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import express from "express";
-import cors from "cors";
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
-import { createServer } from "http";
-import routes from "@/routes/index";
 import { connectMongoDB } from "@/config/database";
+import routes from "@/routes/index";
 import cookieParser from "cookie-parser";
+import cors from "cors";
+import express from "express";
+import rateLimit from "express-rate-limit";
+import helmet from "helmet";
 
 const app = express();
-const httpServer = createServer(app);
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8000;
 
 // Middleware
 app.use(helmet());
@@ -79,17 +77,15 @@ app.use((_req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
-// Bootstrap
 const startServer = async () => {
   try {
     await connectMongoDB();
 
-    httpServer.listen(PORT, () => {
+    app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
   } catch (error) {
     console.error("Failed to start server", error);
-    process.exit(1);
   }
 };
 

@@ -131,6 +131,12 @@ export const updateStaffProfile = async (req: any, res: Response) => {
     gender: user.profile?.gender || "other",
   };
 
+  await sendNotification({
+    userId: req.user.id,
+    title: "Profile Updated",
+    body: "Your profile was updated successfully",
+  });
+
   res.json({
     message: "Profile updated successfully",
     data: response,
@@ -217,14 +223,12 @@ export const updateAppointmentStatus = async (req: any, res: Response) => {
 
   await appointment.save();
 
-  // 🔔 notify client
-  if (appointment.client) {
-    await sendNotification(
-      appointment.client.toString(),
-      "Appointment Update",
-      `Your appointment was marked as ${status}`,
-    );
-  }
+  // Notify client
+  await sendNotification({
+    userId: req.user.id,
+    title: "Appointment Update",
+    body: `Your appointment was marked as ${status}`,
+  });
 
   res.json(appointment);
 };
