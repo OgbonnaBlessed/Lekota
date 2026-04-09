@@ -1,5 +1,6 @@
 "use client";
 
+import Animate from "@/components/layout/Animate";
 
 /* ================= BASE SKELETON ================= */
 const Skeleton = ({ className }: { className?: string }) => (
@@ -94,10 +95,12 @@ const CardSkeleton = () => (
 /* ================= MAIN ================= */
 export default function AppointmentsSkeleton() {
   return (
-    <div className="space-y-6">
-      <HeaderSkeleton />
-      <TableSkeleton />
-      <CardSkeleton />
-    </div>
+    <Animate>
+      <div className="space-y-6">
+        <HeaderSkeleton />
+        <TableSkeleton />
+        <CardSkeleton />
+      </div>
+    </Animate>
   );
 }

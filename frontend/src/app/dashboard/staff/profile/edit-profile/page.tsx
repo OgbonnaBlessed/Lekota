@@ -2,6 +2,7 @@
 /* eslint-disable react-hooks/refs */
 "use client";
 
+import Animate from "@/components/layout/Animate";
 import { Button } from "@/components/ui/button";
 import { Command, CommandItem } from "@/components/ui/command";
 import Input from "@/components/ui/input";
@@ -206,233 +207,237 @@ const Page = () => {
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-8">
-        {/* IMAGE */}
-        <div className="flex items-center gap-4">
-          <label className="cursor-pointer">
-            <input type="file" hidden onChange={handleImageChange} />
+      <Animate>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-8">
+          {/* IMAGE */}
+          <div className="flex items-center gap-4">
+            <label className="cursor-pointer">
+              <input type="file" hidden onChange={handleImageChange} />
 
-            <div className="relative w-24 h-24 rounded-full overflow-hidden border border-[#2D36E0]">
-              {form.image ? (
-                <Image
-                  src={URL.createObjectURL(form.image)}
-                  alt=""
-                  fill
-                  onLoadingComplete={() => setImageLoading(false)}
-                  className={`object-cover transition-opacity duration-500 ${
-                    imageLoading ? "opacity-40" : "opacity-100"
-                  }`}
-                />
-              ) : form.imageUrl ? (
-                <Image
-                  src={form.imageUrl}
-                  alt=""
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full bg-gray-200">
-                  <ImageIcon />
-                </div>
-              )}
-            </div>
-          </label>
-
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col">
-              <p className="text-sm font-medium">{form.name}</p>
-              <p className="text-xs text-gray-400">{form.email}</p>
-            </div>
-            <p className="text-xs text-blue-600 flex items-center gap-1">
-              <ImageUpIcon size={12} /> Upload photo
-            </p>
-          </div>
-        </div>
-
-        {/* INPUTS */}
-        <Input
-          name="name"
-          label="Name"
-          placeholder="Enter your name"
-          value={form.name}
-          onChange={handleChange}
-        />
-        <Input
-          name="email"
-          label="Email"
-          placeholder="Enter your email"
-          value={form.email}
-          onChange={handleChange}
-        />
-
-        <div className="w-full flex flex-col lg:flex-row items-start gap-4">
-          <div className="flex flex-col gap-2 w-full lg:w-1/2">
-            <label className="text-sm font-medium text-[#6B7280]">
-              Service
+              <div className="relative w-24 h-24 rounded-full overflow-hidden border border-[#2D36E0]">
+                {form.image ? (
+                  <Image
+                    src={URL.createObjectURL(form.image)}
+                    alt=""
+                    fill
+                    onLoadingComplete={() => setImageLoading(false)}
+                    className={`object-cover transition-opacity duration-500 ${
+                      imageLoading ? "opacity-40" : "opacity-100"
+                    }`}
+                  />
+                ) : form.imageUrl ? (
+                  <Image
+                    src={form.imageUrl}
+                    alt=""
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full bg-gray-200">
+                    <ImageIcon />
+                  </div>
+                )}
+              </div>
             </label>
+
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col">
+                <p className="text-sm font-medium">{form.name}</p>
+                <p className="text-xs text-gray-400">{form.email}</p>
+              </div>
+              <p className="text-xs text-blue-600 flex items-center gap-1">
+                <ImageUpIcon size={12} /> Upload photo
+              </p>
+            </div>
+          </div>
+
+          {/* INPUTS */}
+          <Input
+            name="name"
+            label="Name"
+            placeholder="Enter your name"
+            value={form.name}
+            onChange={handleChange}
+          />
+          <Input
+            name="email"
+            label="Email"
+            placeholder="Enter your email"
+            value={form.email}
+            onChange={handleChange}
+          />
+
+          <div className="w-full flex flex-col lg:flex-row items-start gap-4">
+            <div className="flex flex-col gap-2 w-full lg:w-1/2">
+              <label className="text-sm font-medium text-[#6B7280]">
+                Service
+              </label>
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="text-base border border-gray-300 rounded-xl px-4 py-3 text-left"
+                  >
+                    {form.service || "Select service"}
+                  </button>
+                </PopoverTrigger>
+
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    {services.map((s: any) => (
+                      <CommandItem
+                        key={s._id}
+                        onSelect={() => {
+                          setForm((prev) => ({
+                            ...prev,
+                            service: s.name,
+                            sub_service: [], // reset subservices
+                          }));
+                        }}
+                      >
+                        {s.name}
+                      </CommandItem>
+                    ))}
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* SUB SERVICES */}
+            <div className="w-full lg:w-1/2 flex flex-col">
+              <label className="text-sm font-medium text-[#6B7280]">
+                Subservices
+              </label>
+              <Popover
+                open={showAddSubserviceField}
+                onOpenChange={setShowAddSubserviceField}
+              >
+                <div className="relative w-full min-h-12 flex flex-row border border-gray-300 rounded-xl gap-2 px-4 py-3 mt-2 overflow-x-auto no-scroll-bar">
+                  {form.sub_service.length > 0 ? (
+                    <>
+                      {form.sub_service.map((item, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-1 px-2 py-1 bg-[#2D36E0]/10 text-xs text-[#2D36E0] rounded"
+                        >
+                          <span>{item}</span>
+                          <X
+                            size={12}
+                            className="cursor-pointer"
+                            onClick={() => removeSubService(index)}
+                          />
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <span className="text-gray-400">Select a Subservice</span>
+                  )}
+
+                  <PopoverTrigger asChild>
+                    <div
+                      onClick={() => {
+                        if (!form.service) {
+                          toast.error("Select a service first");
+                          return;
+                        }
+                        setShowAddSubserviceField(true);
+                      }}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 bg-[#2D36E0] text-white p-2 rounded-full cursor-pointer"
+                    >
+                      <Plus size={14} />
+                    </div>
+                  </PopoverTrigger>
+                </div>
+
+                <PopoverContent align="end" className="w-full p-0">
+                  <Command>
+                    {selectedService?.subServices?.map((sub: string) => (
+                      <CommandItem
+                        key={sub}
+                        onSelect={() => {
+                          if (!form.sub_service.includes(sub)) {
+                            setForm((prev) => ({
+                              ...prev,
+                              sub_service: [...prev.sub_service, sub],
+                            }));
+                          }
+                          setShowAddSubserviceField(false);
+                        }}
+                      >
+                        {sub}
+                      </CommandItem>
+                    ))}
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+
+          <Input
+            name="location"
+            label="Location"
+            placeholder="Enter your location"
+            value={form.location}
+            onChange={handleChange}
+          />
+          <Input
+            name="phone"
+            label="Phone number"
+            type="number"
+            placeholder="Enter your phone number"
+            value={form.phone}
+            onChange={handleChange}
+          />
+          <Input
+            name="bio"
+            label="Bio"
+            placeholder="Enter your bio"
+            value={form.bio}
+            onChange={handleChange}
+          />
+
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-[#6B7280]">Gender</label>
 
             <Popover>
               <PopoverTrigger asChild>
                 <button
                   type="button"
-                  className="text-base border border-gray-300 rounded-xl px-4 py-3 text-left"
+                  className="border rounded-xl px-4 py-3 text-left"
                 >
-                  {form.service || "Select service"}
+                  {form.gender || "Select gender"}
                 </button>
               </PopoverTrigger>
 
               <PopoverContent className="w-full p-0">
                 <Command>
-                  {services.map((s: any) => (
+                  {["male", "female", "other"].map((g) => (
                     <CommandItem
-                      key={s._id}
-                      onSelect={() => {
-                        setForm((prev) => ({
-                          ...prev,
-                          service: s.name,
-                          sub_service: [], // reset subservices
-                        }));
-                      }}
-                    >
-                      {s.name}
-                    </CommandItem>
-                  ))}
-                </Command>
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          {/* SUB SERVICES */}
-          <div className="w-full lg:w-1/2 flex flex-col">
-            <label className="text-sm font-medium text-[#6B7280]">
-              Subservices
-            </label>
-            <Popover
-              open={showAddSubserviceField}
-              onOpenChange={setShowAddSubserviceField}
-            >
-              <div className="relative w-full min-h-12 flex flex-row border border-gray-300 rounded-xl gap-2 px-4 py-3 mt-2 overflow-x-auto no-scroll-bar">
-                {form.sub_service.length > 0 ? (
-                  <>
-                    {form.sub_service.map((item, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-1 px-2 py-1 bg-[#2D36E0]/10 text-xs text-[#2D36E0] rounded"
-                      >
-                        <span>{item}</span>
-                        <X
-                          size={12}
-                          className="cursor-pointer"
-                          onClick={() => removeSubService(index)}
-                        />
-                      </div>
-                    ))}
-                  </>
-                ) : (
-                  <span className="text-gray-400">Select a Subservice</span>
-                )}
-
-                <PopoverTrigger asChild>
-                  <div
-                    onClick={() => {
-                      if (!form.service) {
-                        toast.error("Select a service first");
-                        return;
+                      key={g}
+                      onSelect={() =>
+                        setForm((prev) => ({ ...prev, gender: g }))
                       }
-                      setShowAddSubserviceField(true);
-                    }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-[#2D36E0] text-white p-2 rounded-full cursor-pointer"
-                  >
-                    <Plus size={14} />
-                  </div>
-                </PopoverTrigger>
-              </div>
-
-              <PopoverContent align="end" className="w-full p-0">
-                <Command>
-                  {selectedService?.subServices?.map((sub: string) => (
-                    <CommandItem
-                      key={sub}
-                      onSelect={() => {
-                        if (!form.sub_service.includes(sub)) {
-                          setForm((prev) => ({
-                            ...prev,
-                            sub_service: [...prev.sub_service, sub],
-                          }));
-                        }
-                        setShowAddSubserviceField(false);
-                      }}
                     >
-                      {sub}
+                      {g}
                     </CommandItem>
                   ))}
                 </Command>
               </PopoverContent>
             </Popover>
           </div>
-        </div>
 
-        <Input
-          name="location"
-          label="Location"
-          placeholder="Enter your location"
-          value={form.location}
-          onChange={handleChange}
-        />
-        <Input
-          name="phone"
-          label="Phone number"
-          type="number"
-          placeholder="Enter your phone number"
-          value={form.phone}
-          onChange={handleChange}
-        />
-        <Input
-          name="bio"
-          label="Bio"
-          placeholder="Enter your bio"
-          value={form.bio}
-          onChange={handleChange}
-        />
-
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-[#6B7280]">Gender</label>
-
-          <Popover>
-            <PopoverTrigger asChild>
-              <button
-                type="button"
-                className="border rounded-xl px-4 py-3 text-left"
-              >
-                {form.gender || "Select gender"}
-              </button>
-            </PopoverTrigger>
-
-            <PopoverContent className="w-full p-0">
-              <Command>
-                {["male", "female", "other"].map((g) => (
-                  <CommandItem
-                    key={g}
-                    onSelect={() => setForm((prev) => ({ ...prev, gender: g }))}
-                  >
-                    {g}
-                  </CommandItem>
-                ))}
-              </Command>
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        {/* BUTTON */}
-        <Button
-          type="submit"
-          disabled={!hasChanged() || uploading || imageLoading}
-          className="w-fit bg-[#2D36E0] disabled:bg-[#2D36E0]/50 p-5"
-        >
-          {uploading && <Loader2 size={14} className="animate-spin" />}
-          {uploading ? "Saving..." : "Save Changes"}
-        </Button>
-      </form>
+          {/* BUTTON */}
+          <Button
+            type="submit"
+            disabled={!hasChanged() || uploading || imageLoading}
+            className="w-fit bg-[#2D36E0] disabled:bg-[#2D36E0]/50 p-5"
+          >
+            {uploading && <Loader2 size={14} className="animate-spin" />}
+            {uploading ? "Saving..." : "Save Changes"}
+          </Button>
+        </form>
+      </Animate>
 
       <Modal
         header="Profile updated"

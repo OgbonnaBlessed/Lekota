@@ -1,13 +1,7 @@
 "use client";
 
-/* ================= SHIMMER WRAPPER ================= */
-const Skeleton = ({ className }: { className?: string }) => (
-  <div
-    className={`relative overflow-hidden bg-gray-200 rounded-md ${className}`}
-  >
-    <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-linear-to-r from-transparent via-white/60 to-transparent" />
-  </div>
-);
+import Animate from "@/components/layout/Animate";
+import { Skeleton } from "./skeleton";
 
 /* ================= TABLE SKELETON ================= */
 const TableSkeleton = () => (
@@ -94,27 +88,29 @@ const PaginationSkeleton = () => (
 /* ================= MAIN PAGE SKELETON ================= */
 const PageSkeleton = () => {
   return (
-    <div className="w-full flex flex-col gap-5">
-      {/* HEADER */}
-      <div className="space-y-2">
-        <Skeleton className="h-6 md:h-8 w-40" />
-        <Skeleton className="h-4 w-64" />
-      </div>
+    <Animate>
+      <div className="w-full flex flex-col gap-5">
+        {/* HEADER */}
+        <div className="space-y-2">
+          <Skeleton className="h-6 md:h-8 w-40" />
+          <Skeleton className="h-4 w-64" />
+        </div>
 
-      {/* TABS */}
-      <div className="flex gap-2 bg-gray-100 p-2 rounded-full w-fit">
-        <Skeleton className="h-10 w-28 rounded-full" />
-        <Skeleton className="h-10 w-28 rounded-full" />
-        <Skeleton className="h-10 w-28 rounded-full" />
-      </div>
+        {/* TABS */}
+        <div className="flex gap-2 bg-gray-100 p-2 rounded-full w-fit">
+          <Skeleton className="h-10 w-28 rounded-full" />
+          <Skeleton className="h-10 w-28 rounded-full" />
+          <Skeleton className="h-10 w-28 rounded-full" />
+        </div>
 
-      {/* CONTENT */}
-      <div className="flex flex-col gap-5">
-        <TableSkeleton />
-        <CardSkeleton />
-        <PaginationSkeleton />
+        {/* CONTENT */}
+        <div className="flex flex-col gap-5">
+          <TableSkeleton />
+          <CardSkeleton />
+          <PaginationSkeleton />
+        </div>
       </div>
-    </div>
+    </Animate>
   );
 };
 

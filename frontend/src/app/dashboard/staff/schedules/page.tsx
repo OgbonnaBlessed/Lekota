@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import Animate from "@/components/layout/Animate";
 import {
   CardSkeleton,
   PaginationSkeleton,
@@ -326,60 +327,62 @@ export default function Page() {
   };
 
   return (
-    <div className="w-full flex flex-col gap-5">
-      <div>
-        <h1 className="text-xl md:text-3xl font-medium">Schedules</h1>
-        <p className="text-sm md:text-base">
-          Access your schedules both past and now
-        </p>
+    <Animate>
+      <div className="w-full flex flex-col gap-5">
+        <div>
+          <h1 className="text-xl md:text-3xl font-medium">Schedules</h1>
+          <p className="text-sm md:text-base">
+            Access your schedules both past and now
+          </p>
+        </div>
+
+        <Tabs defaultValue="upcoming">
+          <TabsList className="justify-start gap-2 bg-gray-100 py-6 px-2 rounded-full">
+            <TabsTrigger
+              value="upcoming"
+              className="data-[state=active]:bg-[#2D36E0] data-[state=active]:text-white text-black data-[state=active]:p-4 p-4 rounded-full transition-all duration-300"
+            >
+              Upcoming
+            </TabsTrigger>
+            <TabsTrigger
+              value="week"
+              className="data-[state=active]:bg-[#2D36E0] data-[state=active]:text-white text-black data-[state=active]:p-4 p-4 rounded-full"
+            >
+              This week
+            </TabsTrigger>
+            <TabsTrigger
+              value="past"
+              className="data-[state=active]:bg-[#2D36E0] data-[state=active]:text-white text-black data-[state=active]:p-4 p-4 rounded-full"
+            >
+              Past
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="upcoming" className="mt-5">
+            <Section
+              type="upcoming"
+              page={pages.upcoming}
+              setPage={(n) => setPage("upcoming", n)}
+            />
+          </TabsContent>
+
+          <TabsContent value="week" className="mt-5">
+            <Section
+              type="week"
+              page={pages.week}
+              setPage={(n) => setPage("week", n)}
+            />
+          </TabsContent>
+
+          <TabsContent value="past" className="mt-5">
+            <Section
+              type="past"
+              page={pages.past}
+              setPage={(n) => setPage("past", n)}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
-
-      <Tabs defaultValue="upcoming">
-        <TabsList className="justify-start gap-2 bg-gray-100 py-6 px-2 rounded-full">
-          <TabsTrigger
-            value="upcoming"
-            className="data-[state=active]:bg-[#2D36E0] data-[state=active]:text-white text-black data-[state=active]:p-4 p-4 rounded-full transition-all duration-300"
-          >
-            Upcoming
-          </TabsTrigger>
-          <TabsTrigger
-            value="week"
-            className="data-[state=active]:bg-[#2D36E0] data-[state=active]:text-white text-black data-[state=active]:p-4 p-4 rounded-full"
-          >
-            This week
-          </TabsTrigger>
-          <TabsTrigger
-            value="past"
-            className="data-[state=active]:bg-[#2D36E0] data-[state=active]:text-white text-black data-[state=active]:p-4 p-4 rounded-full"
-          >
-            Past
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="upcoming" className="mt-5">
-          <Section
-            type="upcoming"
-            page={pages.upcoming}
-            setPage={(n) => setPage("upcoming", n)}
-          />
-        </TabsContent>
-
-        <TabsContent value="week" className="mt-5">
-          <Section
-            type="week"
-            page={pages.week}
-            setPage={(n) => setPage("week", n)}
-          />
-        </TabsContent>
-
-        <TabsContent value="past" className="mt-5">
-          <Section
-            type="past"
-            page={pages.past}
-            setPage={(n) => setPage("past", n)}
-          />
-        </TabsContent>
-      </Tabs>
-    </div>
+    </Animate>
   );
 }

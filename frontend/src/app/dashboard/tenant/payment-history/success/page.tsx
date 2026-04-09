@@ -2,6 +2,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
+import Animate from "@/components/layout/Animate";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/lib/toast";
 import { useLazyVerifyPaymentQuery } from "@/redux/api/tenant.api";
@@ -56,45 +57,49 @@ export default function PaymentSuccess() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-full px-4">
-      <div className="bg-gray-100 w-full max-w-md p-8 rounded-2xl shadow-sm text-center space-y-6">
-        {/* ICON */}
-        <div className="flex justify-center">
-          {status === "loading" && (
-            <Loader2 className="animate-spin text-[#2D36E0]" size={40} />
-          )}
+    <Animate>
+      <div className="flex items-center justify-center min-h-full px-4">
+        <div className="bg-gray-100 w-full max-w-md p-8 rounded-2xl shadow-sm text-center space-y-6">
+          {/* ICON */}
+          <div className="flex justify-center">
+            {status === "loading" && (
+              <Loader2 className="animate-spin text-[#2D36E0]" size={40} />
+            )}
 
+            {status === "success" && (
+              <CheckCircle className="text-green-500" size={48} />
+            )}
+
+            {status === "error" && (
+              <XCircle className="text-red-500" size={48} />
+            )}
+          </div>
+
+          {/* TITLE */}
+          <h2 className="text-xl font-semibold">
+            {status === "loading" && "Processing Payment"}
+            {status === "success" && "Payment Successful 🎉"}
+            {status === "error" && "Payment Failed"}
+          </h2>
+
+          {/* MESSAGE */}
+          <p className="text-sm text-gray-500">{message}</p>
+
+          {/* ACTION */}
           {status === "success" && (
-            <CheckCircle className="text-green-500" size={48} />
+            <p className="text-xs text-gray-400">Redirecting to dashboard...</p>
           )}
 
-          {status === "error" && <XCircle className="text-red-500" size={48} />}
+          {status === "error" && (
+            <Button
+              onClick={handleRetry}
+              className="w-full text-sm bg-[#2D36E0] text-white py-6 rounded-lg hover:opacity-90 transition"
+            >
+              Retry Verification
+            </Button>
+          )}
         </div>
-
-        {/* TITLE */}
-        <h2 className="text-xl font-semibold">
-          {status === "loading" && "Processing Payment"}
-          {status === "success" && "Payment Successful 🎉"}
-          {status === "error" && "Payment Failed"}
-        </h2>
-
-        {/* MESSAGE */}
-        <p className="text-sm text-gray-500">{message}</p>
-
-        {/* ACTION */}
-        {status === "success" && (
-          <p className="text-xs text-gray-400">Redirecting to dashboard...</p>
-        )}
-
-        {status === "error" && (
-          <Button
-            onClick={handleRetry}
-            className="w-full text-sm bg-[#2D36E0] text-white py-6 rounded-lg hover:opacity-90 transition"
-          >
-            Retry Verification
-          </Button>
-        )}
       </div>
-    </div>
+    </Animate>
   );
 }

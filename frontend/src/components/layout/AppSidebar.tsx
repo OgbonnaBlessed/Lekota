@@ -38,6 +38,12 @@ export function AppSidebar({ role }: { role: Role }) {
   const links = sidebarConfig[role];
   const { toggleSidebar } = useSidebar();
 
+  const closeSidebar = () => {
+    if (window.innerWidth < 768) {
+      toggleSidebar();
+    }
+  };
+
   const shouldUseFallback =
     !user?.profile?.image ||
     user?.role === "tenant_admin" ||
@@ -114,6 +120,7 @@ export function AppSidebar({ role }: { role: Role }) {
                       <Link
                         href={`/dashboard${link.href}`}
                         scroll={false}
+                        onClick={closeSidebar}
                         className="relative flex items-center hover:bg-[#2D36E0]/10"
                       >
                         <Icon
@@ -145,7 +152,10 @@ export function AppSidebar({ role }: { role: Role }) {
                     className="w-fit hover:bg-transparent group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:py-4 transition-all duration-300 rounded-lg"
                   >
                     <button
-                      onClick={() => setPay((prev) => !prev)}
+                      onClick={() => {
+                        setPay((prev) => !prev);
+                        closeSidebar();
+                      }}
                       className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#2D36E0]/10 transition"
                     >
                       <Stars size={18} />
@@ -165,6 +175,7 @@ export function AppSidebar({ role }: { role: Role }) {
                 >
                   <Link
                     href="/"
+                    onClick={closeSidebar}
                     className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#2D36E0]/10 transition"
                   >
                     <Home size={18} />
@@ -182,7 +193,10 @@ export function AppSidebar({ role }: { role: Role }) {
                   className="hover:bg-red-500/10 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:py-4 transition-all duration-300 rounded-lg"
                 >
                   <button
-                    onClick={() => setShow(true)}
+                    onClick={() => {
+                      setShow(true);
+                      closeSidebar();
+                    }}
                     className="flex items-center gap-3 py-2 px-3 rounded-lg transition"
                   >
                     <LogOut size={18} />
@@ -279,7 +293,7 @@ export function AppSidebar({ role }: { role: Role }) {
         href="/payment"
         link="Proceed to Payment"
         visible={pay}
-        onClose={() => {setPay(false)}}
+        onClose={() => setPay(false)}
         onClick={() => handlePayment()}
       />
     </>

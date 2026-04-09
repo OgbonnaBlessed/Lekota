@@ -33,6 +33,7 @@ import {
   useGetThroughputQuery,
 } from "@/redux/api/admin.api";
 import DashboardOverviewSkeleton from "@/components/ui/skeleton/DashboardOverviewSkeleton";
+import Animate from "@/components/layout/Animate";
 
 const systemHealth = [
   { name: "API Server", status: "healthy" },
@@ -92,150 +93,156 @@ const Page = () => {
   }
 
   return (
-    <div className="p-6 space-y-10">
-      {/* ===================== */}
-      {/* 🔹 ANALYTICS SECTION */}
-      {/* ===================== */}
-      <div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {analyticsData.map((item) => (
-            <div
-              key={item.label}
-              className="shadow shadow-[#ABABAB] rounded-xl p-5 bg-white"
-            >
-              <p className="text-sm text-gray-500">{item.label}</p>
-              <h3 className="text-2xl font-bold mt-2">{item.value}</h3>
-            </div>
-          ))}
+    <Animate>
+      <div className="space-y-10">
+        {/* ===================== */}
+        {/* 🔹 ANALYTICS SECTION */}
+        {/* ===================== */}
+        <div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {analyticsData.map((item) => (
+              <div
+                key={item.label}
+                className="shadow shadow-[#ABABAB] rounded-xl p-5 bg-white"
+              >
+                <p className="text-sm text-gray-500">{item.label}</p>
+                <h3 className="text-2xl font-bold mt-2">{item.value}</h3>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* ===================== */}
-      {/* 🔹 PERFORMANCE */}
-      {/* ===================== */}
-      <div>
-        <Card className="shadow shadow-[#ABABAB] border-none">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-lg">Performance</CardTitle>
-              <CardDescription className="flex items-center gap-1">
-                <p className="text-sm text-muted-foreground">
-                  Through put &gt;
-                </p>
-                <p className="text-sm font-semibold">{totalThroughput}</p>
-              </CardDescription>
-            </div>
+        {/* ===================== */}
+        {/* 🔹 PERFORMANCE */}
+        {/* ===================== */}
+        <div>
+          <Card className="shadow shadow-[#ABABAB] border-none">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-lg">Performance</CardTitle>
+                <CardDescription className="flex items-center gap-1">
+                  <p className="text-sm text-muted-foreground">
+                    Through put &gt;
+                  </p>
+                  <p className="text-sm font-semibold">{totalThroughput}</p>
+                </CardDescription>
+              </div>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="flex items-center gap-2 text-xs"
-                >
-                  {range.charAt(0).toUpperCase() + range.slice(1)}
-                  <ChevronDown size={14} />
-                </Button>
-              </DropdownMenuTrigger>
-
-              <DropdownMenuContent align="end">
-                {["daily", "weekly", "monthly", "yearly"].map((r) => (
-                  <DropdownMenuItem
-                    key={r}
-                    onClick={() => setRange(r)}
-                    className={`cursor-pointer capitalize ${
-                      range === r ? "bg-gray-100 font-medium" : ""
-                    }`}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2 text-xs"
                   >
-                    {r}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </CardHeader>
+                    {range.charAt(0).toUpperCase() + range.slice(1)}
+                    <ChevronDown size={14} />
+                  </Button>
+                </DropdownMenuTrigger>
 
-          <CardContent className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={throughputData}>
-                {/* Gradient */}
-                <defs>
-                  <linearGradient id="colorFlow" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopOpacity={0.3} />
-                    <stop offset="95%" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
+                <DropdownMenuContent align="end">
+                  {["daily", "weekly", "monthly", "yearly"].map((r) => (
+                    <DropdownMenuItem
+                      key={r}
+                      onClick={() => setRange(r)}
+                      className={`cursor-pointer capitalize ${
+                        range === r ? "bg-gray-100 font-medium" : ""
+                      }`}
+                    >
+                      {r}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </CardHeader>
 
-                {/* Grid */}
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  vertical={false}
-                  opacity={0.2}
+            <CardContent className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={throughputData}>
+                  {/* Gradient */}
+                  <defs>
+                    <linearGradient id="colorFlow" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopOpacity={0.3} />
+                      <stop offset="95%" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+
+                  {/* Grid */}
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    opacity={0.2}
+                  />
+
+                  {/* Axes */}
+                  <XAxis
+                    dataKey="time"
+                    tickLine={false}
+                    axisLine={false}
+                    className="text-xs"
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    className="text-xs"
+                  />
+
+                  {/* Tooltip */}
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: "12px",
+                      border: "1px solid #e5e7eb",
+                      fontSize: "12px",
+                    }}
+                    cursor={{ strokeDasharray: "3 3" }}
+                  />
+
+                  {/* Area (for depth) */}
+                  <Area
+                    type="monotone"
+                    dataKey="value"
+                    fill="url(#colorFlow)"
+                    stroke="none"
+                  />
+
+                  {/* Line (main focus) */}
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    strokeWidth={3}
+                    dot={{ r: 4 }}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* ===================== */}
+        {/* 🔹 SYSTEM HEALTH */}
+        {/* ===================== */}
+        <div>
+          <h2 className="text-xl font-semibold mb-4">System Health</h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {systemHealth.map((service) => (
+              <div
+                key={service.name}
+                className="border rounded-xl p-5 bg-white shadow-sm flex items-center justify-between"
+              >
+                <span className="text-sm font-medium">{service.name}</span>
+
+                <span
+                  className={`w-3 h-3 rounded-full ${getStatusColor(
+                    service.status,
+                  )}`}
                 />
-
-                {/* Axes */}
-                <XAxis
-                  dataKey="time"
-                  tickLine={false}
-                  axisLine={false}
-                  className="text-xs"
-                />
-                <YAxis tickLine={false} axisLine={false} className="text-xs" />
-
-                {/* Tooltip */}
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: "12px",
-                    border: "1px solid #e5e7eb",
-                    fontSize: "12px",
-                  }}
-                  cursor={{ strokeDasharray: "3 3" }}
-                />
-
-                {/* Area (for depth) */}
-                <Area
-                  type="monotone"
-                  dataKey="value"
-                  fill="url(#colorFlow)"
-                  stroke="none"
-                />
-
-                {/* Line (main focus) */}
-                <Line
-                  type="monotone"
-                  dataKey="value"
-                  strokeWidth={3}
-                  dot={{ r: 4 }}
-                  activeDot={{ r: 6 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* ===================== */}
-      {/* 🔹 SYSTEM HEALTH */}
-      {/* ===================== */}
-      <div>
-        <h2 className="text-xl font-semibold mb-4">System Health</h2>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {systemHealth.map((service) => (
-            <div
-              key={service.name}
-              className="border rounded-xl p-5 bg-white shadow-sm flex items-center justify-between"
-            >
-              <span className="text-sm font-medium">{service.name}</span>
-
-              <span
-                className={`w-3 h-3 rounded-full ${getStatusColor(
-                  service.status,
-                )}`}
-              />
-            </div>
-          ))}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </Animate>
   );
 };
 

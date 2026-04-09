@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/refs */
 "use client";
 
+import Animate from "@/components/layout/Animate";
 import { Button } from "@/components/ui/button";
 import { Command, CommandItem } from "@/components/ui/command";
 import Input from "@/components/ui/input";
@@ -13,7 +14,7 @@ import {
 import EditProfileSkeleton from "@/components/ui/skeleton/EditProfileSkeleton";
 import {
   useGetClientProfileQuery,
-  useUpdateClientProfileMutation
+  useUpdateClientProfileMutation,
 } from "@/redux/api/client.api";
 import { ImageIcon, ImageUpIcon, Loader2 } from "lucide-react";
 import Image from "next/image";
@@ -181,125 +182,129 @@ const Page = () => {
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-8">
-        {/* IMAGE */}
-        <div className="flex items-center gap-4">
-          <label className="cursor-pointer">
-            <input type="file" hidden onChange={handleImageChange} />
+      <Animate>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-8">
+          {/* IMAGE */}
+          <div className="flex items-center gap-4">
+            <label className="cursor-pointer">
+              <input type="file" hidden onChange={handleImageChange} />
 
-            <div className="relative w-24 h-24 rounded-full overflow-hidden border border-[#2D36E0]">
-              {form.image ? (
-                <Image
-                  src={URL.createObjectURL(form.image)}
-                  alt=""
-                  fill
-                  onLoadingComplete={() => setImageLoading(false)}
-                  className={`object-cover transition-opacity duration-500 ${
-                    imageLoading ? "opacity-40" : "opacity-100"
-                  }`}
-                />
-              ) : form.imageUrl ? (
-                <Image
-                  src={form.imageUrl}
-                  alt=""
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full bg-gray-200">
-                  <ImageIcon />
-                </div>
-              )}
-            </div>
-          </label>
+              <div className="relative w-24 h-24 rounded-full overflow-hidden border border-[#2D36E0]">
+                {form.image ? (
+                  <Image
+                    src={URL.createObjectURL(form.image)}
+                    alt=""
+                    fill
+                    onLoadingComplete={() => setImageLoading(false)}
+                    className={`object-cover transition-opacity duration-500 ${
+                      imageLoading ? "opacity-40" : "opacity-100"
+                    }`}
+                  />
+                ) : form.imageUrl ? (
+                  <Image
+                    src={form.imageUrl}
+                    alt=""
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full bg-gray-200">
+                    <ImageIcon />
+                  </div>
+                )}
+              </div>
+            </label>
 
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col">
-              <p className="text-sm font-medium">{form.name}</p>
-              <p className="text-xs text-gray-400">{form.email}</p>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col">
+                <p className="text-sm font-medium">{form.name}</p>
+                <p className="text-xs text-gray-400">{form.email}</p>
+              </div>
+              <p className="text-xs text-blue-600 flex items-center gap-1">
+                <ImageUpIcon size={12} /> Upload photo
+              </p>
             </div>
-            <p className="text-xs text-blue-600 flex items-center gap-1">
-              <ImageUpIcon size={12} /> Upload photo
-            </p>
           </div>
-        </div>
 
-        {/* INPUTS */}
-        <Input
-          name="name"
-          label="Name"
-          placeholder="Enter your name"
-          value={form.name}
-          onChange={handleChange}
-        />
-        <Input
-          name="email"
-          label="Email"
-          placeholder="Enter your email"
-          value={form.email}
-          onChange={handleChange}
-        />
-        <Input
-          name="location"
-          label="Location"
-          placeholder="Enter your location"
-          value={form.location}
-          onChange={handleChange}
-        />
-        <Input
-          name="phone"
-          label="Phone number"
-          type="number"
-          placeholder="Enter your phone number"
-          value={form.phone}
-          onChange={handleChange}
-        />
-        <Input
-          name="bio"
-          label="Bio"
-          placeholder="Enter your bio"
-          value={form.bio}
-          onChange={handleChange}
-        />
+          {/* INPUTS */}
+          <Input
+            name="name"
+            label="Name"
+            placeholder="Enter your name"
+            value={form.name}
+            onChange={handleChange}
+          />
+          <Input
+            name="email"
+            label="Email"
+            placeholder="Enter your email"
+            value={form.email}
+            onChange={handleChange}
+          />
+          <Input
+            name="location"
+            label="Location"
+            placeholder="Enter your location"
+            value={form.location}
+            onChange={handleChange}
+          />
+          <Input
+            name="phone"
+            label="Phone number"
+            type="number"
+            placeholder="Enter your phone number"
+            value={form.phone}
+            onChange={handleChange}
+          />
+          <Input
+            name="bio"
+            label="Bio"
+            placeholder="Enter your bio"
+            value={form.bio}
+            onChange={handleChange}
+          />
 
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-[#6B7280]">Gender</label>
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-[#6B7280]">Gender</label>
 
-          <Popover>
-            <PopoverTrigger asChild>
-              <button
-                type="button"
-                className="border rounded-xl px-4 py-3 text-left"
-              >
-                {form.gender || "Select gender"}
-              </button>
-            </PopoverTrigger>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="border rounded-xl px-4 py-3 text-left"
+                >
+                  {form.gender || "Select gender"}
+                </button>
+              </PopoverTrigger>
 
-            <PopoverContent className="w-full p-0">
-              <Command>
-                {["male", "female", "other"].map((g) => (
-                  <CommandItem
-                    key={g}
-                    onSelect={() => setForm((prev) => ({ ...prev, gender: g }))}
-                  >
-                    {g}
-                  </CommandItem>
-                ))}
-              </Command>
-            </PopoverContent>
-          </Popover>
-        </div>
+              <PopoverContent className="w-full p-0">
+                <Command>
+                  {["male", "female", "other"].map((g) => (
+                    <CommandItem
+                      key={g}
+                      onSelect={() =>
+                        setForm((prev) => ({ ...prev, gender: g }))
+                      }
+                    >
+                      {g}
+                    </CommandItem>
+                  ))}
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
 
-        {/* BUTTON */}
-        <Button
-          type="submit"
-          disabled={!hasChanged() || uploading || imageLoading}
-          className="w-fit bg-[#2D36E0] disabled:bg-[#2D36E0]/50 p-5"
-        >
-          {uploading && <Loader2 size={14} className="animate-spin" />}
-          {uploading ? "Saving..." : "Save Changes"}
-        </Button>
-      </form>
+          {/* BUTTON */}
+          <Button
+            type="submit"
+            disabled={!hasChanged() || uploading || imageLoading}
+            className="w-fit bg-[#2D36E0] disabled:bg-[#2D36E0]/50 p-5"
+          >
+            {uploading && <Loader2 size={14} className="animate-spin" />}
+            {uploading ? "Saving..." : "Save Changes"}
+          </Button>
+        </form>
+      </Animate>
 
       <Modal
         header="Profile updated"

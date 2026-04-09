@@ -139,36 +139,17 @@ textarea::-webkit-scrollbar {
   display: none !important;
 }
 
-/* shimmer effect */
 @keyframes shimmer {
   0% {
-    background-position: -200% 0;
+    transform: translateX(-100%);
   }
   100% {
-    background-position: 200% 0;
+    transform: translateX(100%);
   }
 }
 
-.shimmer {
-  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 37%, #f1f5f9 63%);
-  background-size: 200% 100%;
-  animation: shimmer 2.5s ease infinite;
-}
-
-/* softer shimmer for forms */
-@keyframes shimmer-soft {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.shimmer-soft {
-  background: linear-gradient(90deg, #f8fafc 25%, #e2e8f0 37%, #f8fafc 63%);
-  background-size: 200% 100%;
-  animation: shimmer-soft 1.8s ease infinite;
+.animate-shimmer {
+  animation: shimmer 1.6s infinite linear;
 }
 
 @media (prefers-color-scheme: dark) {

@@ -1,13 +1,14 @@
-import { Bell, ChevronDown, LogOut, Search, X } from "lucide-react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useGetNotificationsQuery } from "@/redux/api/notification.api";
+import { useGetTenantServicesQuery } from "@/redux/api/staff.api";
+import { useAppSelector } from "@/redux/hooks";
+import { AnimatePresence, motion } from "framer-motion";
+import { Bell, ChevronDown, LogOut, Search } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Modal from "../ui/modal";
-import { AnimatePresence, motion } from "framer-motion";
-import { useAppSelector } from "@/redux/hooks";
-import { useGetNotificationsQuery } from "@/redux/api/notification.api";
-
-const searches = ["Search 1", "Search 2", "Search 3", "Search 4", "Search 5"];
+import SearchServiceModal from "./SearchServiceModal";
 
 const Header = () => {
   const user = useAppSelector((state) => state.auth.user);
@@ -16,16 +17,22 @@ const Header = () => {
   const { data } = useGetNotificationsQuery({});
   const unreadCount = data?.unreadCount || 0;
 
-  const [reveal, setReveal] = useState<boolean>(false);
+  const { data: servicesData } = useGetTenantServicesQuery({});
+  const services = servicesData?.services || [];
+
   const [show, setShow] = useState<boolean>(false);
-  const [open, setOpen] = useState<boolean>(false);
-  const [recentSearches, setRecentSearches] = useState<string[]>(searches);
+  const [open, setOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState<any>(null);
+  const [search, setSearch] = useState("");
+
+  const filtered = services.filter((s: any) =>
+    s.name.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  const [reveal, setReveal] = useState<boolean>(false);
+  const [openSearchModal, setOpenSearchModal] = useState<boolean>(false);
   const ref = useRef<HTMLDivElement>(null);
   const ref_2 = useRef<HTMLDivElement>(null);
-
-  const removeRecentSearch = (value: string) => {
-    setRecentSearches((prev) => prev.filter((s) => s !== value));
-  };
 
   // Handle outside click
   useEffect(() => {
@@ -60,6 +67,7 @@ const Header = () => {
               <Search size={16} className="text-gray-500" />
               <input
                 type="text"
+                value={(e: string) => setSearch(e.target.value)}
                 placeholder="Search services & staffs"
                 onFocus={() => setReveal(true)}
                 className="bg-transparent border-none focus:outline-none p-3 placeholder:text-gray-400"
@@ -74,18 +82,16 @@ const Header = () => {
                   transition={{ duration: 0.2, ease: "easeOut" }}
                   className="absolute top-full left-1/2 -translate-x-1/2 min-w-64 bg-white shadow rounded-lg text-sm p-5 mt-2 z-10"
                 >
-                  {recentSearches.map((search, i) => (
+                  {filtered.map((service: any) => (
                     <div
-                      key={i}
+                      key={service._id}
+                      onClick={() => {
+                        setSelectedService(service);
+                        setOpenSearchModal(true);
+                      }}
                       className="flex items-center justify-between mb-3 last:mb-0"
                     >
-                      <p>{search}</p>
-                      <button
-                        onClick={() => removeRecentSearch(search)}
-                        className="text-gray-400 hover:text-gray-600"
-                      >
-                        <X size={14} />
-                      </button>
+                      {service.name}
                     </div>
                   ))}
                 </motion.div>
@@ -171,6 +177,11 @@ const Header = () => {
         </div>
       </div>
 
+      <SearchServiceModal
+        open={openSearchModal}
+        onOpenChange={setOpenSearchModal}
+        service={selectedService}
+      />
       <Modal
         header="Are you sure you want to log out"
         body={
