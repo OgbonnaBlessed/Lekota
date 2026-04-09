@@ -34,6 +34,13 @@ const Header = () => {
   const ref = useRef<HTMLDivElement>(null);
   const ref_2 = useRef<HTMLDivElement>(null);
 
+  const shouldUseFallback =
+    !user?.profile?.image ||
+    user?.role === "tenant_admin" ||
+    user?.role === "admin";
+
+  const firstLetter = user?.name?.charAt(0)?.toUpperCase() || "?";
+
   // Handle outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -67,8 +74,9 @@ const Header = () => {
               <Search size={16} className="text-gray-500" />
               <input
                 type="text"
-                value={(e) => setSearch(e.target.value)}
-                placeholder="Search services & staffs"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search services"
                 onFocus={() => setReveal(true)}
                 className="bg-transparent border-none focus:outline-none p-3 placeholder:text-gray-400"
               />
@@ -80,20 +88,28 @@ const Header = () => {
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: -10 }}
                   transition={{ duration: 0.2, ease: "easeOut" }}
-                  className="absolute top-full left-1/2 -translate-x-1/2 min-w-64 bg-white shadow rounded-lg text-sm p-5 mt-2 z-10"
+                  className="absolute top-full left-1/2 -translate-x-1/2 min-w-64 bg-white shadow rounded-lg text-sm p-2 mt-2 z-10"
                 >
-                  {filtered.map((service: any) => (
-                    <div
-                      key={service._id}
-                      onClick={() => {
-                        setSelectedService(service);
-                        setOpenSearchModal(true);
-                      }}
-                      className="flex items-center justify-between mb-3 last:mb-0"
-                    >
-                      {service.name}
-                    </div>
-                  ))}
+                  {filtered.length > 0 ? (
+                    <>
+                      {filtered.map((service: any) => (
+                        <div
+                          key={service._id}
+                          onClick={() => {
+                            setSelectedService(service);
+                            setOpenSearchModal(true);
+                          }}
+                          className="flex items-center justify-between text-sm hover:bg-gray-100 rounded-lg transition-all duration-300 ease-in-out p-3 cursor-pointer"
+                        >
+                          {service.name}
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <p className="text-xs text-gray-500 py-5 text-center">
+                      Service does not exist{" "}
+                    </p>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -145,20 +161,25 @@ const Header = () => {
                   className="absolute top-full right-0 mt-2 flex flex-col gap-3 bg-white shadow p-5 rounded-lg z-10"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="relative w-7 min-w-5 aspect-square rounded-full overflow-hidden">
-                      <Image
-                        src="/banner.png"
-                        alt="Background"
-                        width={28}
-                        height={28}
-                        preload
-                      />
+                    <div className="relative w-8 aspect-square rounded-full overflow-hidden flex items-center justify-center bg-gray-200">
+                      {shouldUseFallback ? (
+                        <span className="text-xs font-semibold text-gray-700">
+                          {firstLetter}
+                        </span>
+                      ) : (
+                        <Image
+                          src={user.profile.image}
+                          alt={user.name}
+                          fill
+                          className="object-cover"
+                        />
+                      )}
                     </div>
 
                     <div className="text-xs leading-tight group-data-[collapsible=icon]:hidden">
-                      <p className="font-medium">Lekota Incorporated</p>
+                      <p className="font-medium">{user?.name}</p>
                       <p className="text-muted-foreground text-[10px]">
-                        davidcharles@gmail.com
+                        {user?.email}
                       </p>
                     </div>
                   </div>

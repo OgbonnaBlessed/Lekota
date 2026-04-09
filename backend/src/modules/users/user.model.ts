@@ -27,7 +27,9 @@ const UserSchema = new Schema(
 
     profile: {
       image: String,
-      location: String,
+      address: String,
+      postcode: String,
+      county: String,
       phone: String,
       bio: String,
       gender: String,

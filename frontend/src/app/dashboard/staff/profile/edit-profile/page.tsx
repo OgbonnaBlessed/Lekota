@@ -18,6 +18,7 @@ import {
   useGetTenantServicesQuery,
   useUpdateStaffProfileMutation,
 } from "@/redux/api/staff.api";
+import { formatUKPhone } from "@/utils/phone";
 import { ImageIcon, ImageUpIcon, Loader2, Plus, X } from "lucide-react";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
@@ -30,7 +31,9 @@ type Form = {
   email: string;
   service: string;
   sub_service: string[];
-  location: string;
+  address: string;
+  postcode: string;
+  county: string;
   phone: string;
   bio: string;
   gender: string;
@@ -40,10 +43,8 @@ const Page = () => {
   const { data, isLoading } = useGetStaffProfileQuery({});
   const { data: servicesData } = useGetTenantServicesQuery({});
   const services = servicesData?.services || [];
-  console.log(services);
 
   const [updateProfile] = useUpdateStaffProfileMutation();
-
   const [show, setShow] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
@@ -57,8 +58,10 @@ const Page = () => {
     email: "",
     service: "",
     sub_service: [],
-    location: "",
-    phone: "",
+    address: "",
+    postcode: "",
+    county: "",
+    phone: "+44",
     bio: "",
     gender: "other",
   });
@@ -77,8 +80,10 @@ const Page = () => {
         email: data.email || "",
         service: data.service || "",
         sub_service: data.sub_service || [],
-        location: data.location || "",
-        phone: data.phone || "",
+        address: data.address || "",
+        postcode: data.postcode || "",
+        county: data.county || "",
+        phone: formatUKPhone(data.phone || ""),
         bio: data.bio || "",
         gender: data.gender || "other",
       };
@@ -111,6 +116,17 @@ const Page = () => {
   // ===============================
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
+    if (name === "phone") {
+      const formatted = formatUKPhone(value);
+
+      setForm((prev) => ({
+        ...prev,
+        phone: formatted,
+      }));
+      return;
+    }
+
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -190,7 +206,9 @@ const Page = () => {
       email: form.email,
       service: form.service,
       sub_service: form.sub_service,
-      location: form.location,
+      address: form.address,
+      postcode: form.postcode,
+      county: form.county,
       phone: form.phone,
       bio: form.bio,
       gender: form.gender,
@@ -375,19 +393,43 @@ const Page = () => {
           </div>
 
           <Input
-            name="location"
-            label="Location"
-            placeholder="Enter your location"
-            value={form.location}
+            name="address"
+            label="Address"
+            placeholder="Enter your address"
+            value={form.address}
+            onChange={handleChange}
+          />
+          <Input
+            name="postcode"
+            label="Post code"
+            placeholder="Enter your post code"
+            value={form.postcode}
+            onChange={handleChange}
+          />
+          <Input
+            name="county"
+            label="County"
+            placeholder="Enter your county"
+            value={form.county}
             onChange={handleChange}
           />
           <Input
             name="phone"
             label="Phone number"
-            type="number"
-            placeholder="Enter your phone number"
+            type="tel"
+            placeholder="+44XXXXXXXXXX"
             value={form.phone}
             onChange={handleChange}
+            maxLength={13}
+            onKeyDown={(e: any) => {
+              // Prevent deleting +44
+              if (
+                (e.key === "Backspace" || e.key === "Delete") &&
+                form.phone.length <= 3
+              ) {
+                e.preventDefault();
+              }
+            }}
           />
           <Input
             name="bio"

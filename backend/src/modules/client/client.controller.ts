@@ -13,7 +13,9 @@ export const getClientProfile = async (req: any, res: Response) => {
     name: user.name,
     email: user.email,
     image: user.profile?.image,
-    location: user.profile?.location,
+    adress: user.profile?.address,
+    postcode: user.profile?.postcode,
+    county: user.profile?.county,
     bio: user.profile?.bio,
     phone: user.profile?.phone,
   };

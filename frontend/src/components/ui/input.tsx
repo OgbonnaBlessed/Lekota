@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Eye, EyeClosed } from "lucide-react";
@@ -9,6 +10,8 @@ type InputProps = {
   label?: string;
   placeholder?: string;
   value?: string;
+  maxLength?: number;
+  onKeyDown?: (e: any) => void,
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   secured?: boolean;
   className?: string;
@@ -20,6 +23,8 @@ const Input = ({
   label,
   placeholder,
   value,
+  maxLength,
+  onKeyDown,
   onChange,
   secured,
   className,
@@ -41,6 +46,8 @@ const Input = ({
           aria-label={label}
           autoComplete="off"
           value={value}
+          maxLength={maxLength}
+          onKeyDown={onKeyDown}
           onChange={onChange}
           className={`w-full text-base border border-gray-300 rounded-xl px-4 py-3
         focus:outline-none focus:ring-2 focus:ring-[#2D36E0] focus:border-transparent

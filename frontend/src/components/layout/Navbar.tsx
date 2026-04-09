@@ -63,11 +63,13 @@ const Navbar = () => {
                   ? "/dashboard/tenant/overview"
                   : role === "staff"
                     ? "/dashboard/staff/profile"
-                    : "/dashboard/client/profile"
+                    : role === "client"
+                      ? "/dashboard/client/profile"
+                      : "/signin"
             }
           >
             <p className="text-sm text-white bg-[#2D36E0] rounded-full p-4">
-              {role ? "Dashboard" : "Get started"}
+              {user === null ? "Get started" : "Dashboard"}
             </p>
           </Link>
         </div>

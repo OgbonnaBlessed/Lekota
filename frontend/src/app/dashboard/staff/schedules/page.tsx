@@ -255,7 +255,7 @@ const Section = ({
   const mapped = schedules.map((item: any) => ({
     id: item._id,
     user: {
-      image: item.client?.profile?.image || "/avatar.png",
+      image: item.client?.profile?.image || "/banner.png",
       name: item.client?.name,
     },
     date: new Date(item.date).toDateString(),
