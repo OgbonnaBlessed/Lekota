@@ -23,7 +23,7 @@ const Header = () => {
   const [show, setShow] = useState<boolean>(false);
   const [open, setOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<any>(null);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState<string>("");
 
   const filtered = services.filter((s: any) =>
     s.name.toLowerCase().includes(search.toLowerCase()),
@@ -67,7 +67,7 @@ const Header = () => {
               <Search size={16} className="text-gray-500" />
               <input
                 type="text"
-                value={(e: string) => setSearch(e.target.value)}
+                value={(e) => setSearch(e.target.value)}
                 placeholder="Search services & staffs"
                 onFocus={() => setReveal(true)}
                 className="bg-transparent border-none focus:outline-none p-3 placeholder:text-gray-400"
