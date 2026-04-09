@@ -4,17 +4,17 @@ import { Service } from "../services/service.model";
 import { User } from "../users/user.model";
 import { Tenant } from "./tenant.model";
 
-import { sendEmail } from "@/utils/email.util";
 import bcrypt from "bcryptjs";
+import nodemailer from "nodemailer";
 import { v4 as uuid } from "uuid";
 
+import { Role } from "@/types";
 import {
   createServiceSchema,
   createTenantSchema,
   createUserSchema,
   updateUserStatusSchema,
 } from "./tenant.validation";
-import { Role } from "@/types";
 
 // ======================================================
 // 🏢 ADMIN: CREATE TENANT
@@ -59,13 +59,38 @@ export const createTenant = async (req: Request, res: Response) => {
       tenant: tenant._id,
     });
 
-    await sendEmail(
-      email,
-      "Your Tenant Account",
-      `<h2>Welcome to Lekota</h2>
-       <p>Email: ${email}</p>
-       <p>Password: ${rawPassword}</p>`,
-    );
+    const transporter = nodemailer.createTransport({
+      host: "smtp.mail.yahoo.com",
+      port: 465, // or 587
+      secure: true, // true for 465, false for 587
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Verify your account",
+      text: `Your password is ${rawPassword}`,
+    };
+
+    transporter.sendMail(mailOptions, (err) => {
+      if (err) {
+        console.error(err);
+        return res
+          .status(500)
+          .json({ success: false, message: "Error sending OTP" });
+      }
+
+      res
+        .status(200)
+        .json({ success: true, message: "OTP sent to your email" });
+    });
 
     return res.status(201).json({
       message: "Tenant created successfully",
@@ -130,12 +155,14 @@ export const createUser = async (req: any, res: Response) => {
       tenant: req.user.tenant,
     });
 
-    await sendEmail(
-      email,
-      "Your Account Details",
-      `<h2>Welcome to Lekota</h2>
-       <p>Password: ${rawPassword}</p>`,
-    );
+  //   sendEmail(
+  //     email,
+  //     "Your Account Details",
+  //     `<h2>Welcome to Lekota</h2>
+  //  <p>Password: ${rawPassword}</p>`,
+  //   ).catch((err) => {
+  //     console.error("EMAIL FAILED:", err.message);
+  //   });
 
     return res.status(201).json({
       message: "User created successfully",

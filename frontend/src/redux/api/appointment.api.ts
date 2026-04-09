@@ -98,11 +98,71 @@ export const appointmentApi = baseApi.injectEndpoints({
       async onQueryStarted(_, { queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          toast.success(data?.message || "Rescheduled appointment successfully");
+          toast.success(
+            data?.message || "Rescheduled appointment successfully",
+          );
         } catch (err: any) {
           const message =
             err?.error?.data?.message || "Failed to reschedule appointment";
 
+          toast.error(message);
+        }
+      },
+    }),
+
+    // RATE
+    rateAppointment: builder.mutation({
+      query: (data) => ({
+        url: "/appointments/rate",
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["Appointments"],
+      async onQueryStarted(_, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          toast.success(
+            data?.message || "Rescheduled appointment successfully",
+          );
+        } catch (err: any) {
+          const message =
+            err?.error?.data?.message || "Failed to reschedule appointment";
+
+          toast.error(message);
+        }
+      },
+    }),
+
+    addSessionNote: builder.mutation({
+      query: (data) => ({
+        url: "/appointments/note",
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["Appointments"],
+      async onQueryStarted(_, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          toast.success(data?.message);
+        } catch (err: any) {
+          const message = err?.error?.data?.message;
+          toast.error(message);
+        }
+      },
+    }),
+
+    deleteAppointment: builder.mutation({
+      query: (id) => ({
+        url: `/appointments/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Appointments"],
+      async onQueryStarted(_, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          toast.success(data?.message);
+        } catch (err: any) {
+          const message = err?.error?.data?.message;
           toast.error(message);
         }
       },
@@ -116,4 +176,7 @@ export const {
   useCreateAppointmentMutation,
   useCancelAppointmentMutation,
   useRescheduleAppointmentMutation,
+  useRateAppointmentMutation,
+  useAddSessionNoteMutation,
+  useDeleteAppointmentMutation,
 } = appointmentApi;

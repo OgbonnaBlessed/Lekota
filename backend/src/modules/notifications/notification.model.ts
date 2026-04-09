@@ -5,6 +5,10 @@ const NotificationSchema = new Schema(
     user: { type: Schema.Types.ObjectId, ref: "User" },
     title: String,
     body: String,
+    isRead: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );

@@ -1,73 +1,50 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Bell } from "lucide-react";
-
-type Notification = {
-  id: number;
-  title: string;
-  message: string;
-  date: string;
-};
-
-const notifications_data: {
-  today: Notification[];
-  week: Notification[];
-  past: Notification[];
-} = {
-  today: [
-    {
-      id: 1,
-      title: "Cory Jane cancelled your appointment",
-      message:
-        "Your appointment with Cory Jane for 4:00 PM - 4:40 PM (UTC) has been cancelled.",
-      date: "March 31st, 2026",
-    },
-    {
-      id: 2,
-      title: "New booking request received",
-      message:
-        "A new client has requested an appointment for 6:00 PM today. Please review and confirm.",
-      date: "March 31st, 2026",
-    },
-  ],
-
-  week: [
-    {
-      id: 3,
-      title: "Schedule updated successfully",
-      message:
-        "Your availability for this week has been updated. Clients can now book new time slots.",
-      date: "March 29th, 2026",
-    },
-    {
-      id: 4,
-      title: "Payment received",
-      message:
-        "You received a payment of ₦25,000 for a completed session on March 28th.",
-      date: "March 28th, 2026",
-    },
-  ],
-
-  past: [
-    {
-      id: 5,
-      title: "Account verified",
-      message:
-        "Your account was successfully verified. You now have full access to all features.",
-      date: "March 20th, 2026",
-    },
-    {
-      id: 6,
-      title: "Password changed",
-      message:
-        "Your password was updated successfully. If this wasn't you, please contact support immediately.",
-      date: "March 18th, 2026",
-    },
-  ],
-};
+import {
+  useGetNotificationsQuery,
+  useMarkAsReadMutation,
+} from "@/redux/api/notification.api";
+import { formatFullDate } from "@/utils/format-date";
+import NotificationsSkeleton from "@/components/ui/skeleton/NotificationsSkeleton";
+import { useEffect, useState } from "react";
 
 const Page = () => {
+  const { data, isLoading } = useGetNotificationsQuery({});
+  const [markAsRead] = useMarkAsReadMutation();
+
+  const [showSkeleton, setShowSkeleton] = useState<boolean>(true);
+
+  const notifications = data?.notifications || [];
+  console.log("notifications:", notifications);
+
+  const today: any[] = [];
+  const week: any[] = [];
+  const past: any[] = [];
+
+  notifications.forEach((n: any) => {
+    const created = new Date(n.createdAt);
+    const now = new Date();
+
+    const diff = (now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
+
+    if (diff < 1) today.push(n);
+    else if (diff < 7) week.push(n);
+    else past.push(n);
+  });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSkeleton(false);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading || showSkeleton) return <NotificationsSkeleton />;
+
   return (
     <div className="w-full flex flex-col gap-5">
       <div className="flex flex-col gap-1">
@@ -99,58 +76,115 @@ const Page = () => {
 
         <TabsContent value="today" className="mt-5">
           <div className="flex flex-col gap-5">
-            {notifications_data.today.map((item) => (
-              <div key={item.id} className="w-full flex items-start gap-4">
-                <div className="bg-[#2D36E0] text-white rounded-full p-4">
-                  <Bell size={24} />
-                </div>
-                <div>
-                  <p className="font-medium">{item.title}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {item.message}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-3">{item.date}</p>
-                </div>
+            {today.length > 0 ? (
+              <>
+                {today.map((item) => (
+                  <div key={item._id} className="w-full flex items-start gap-4">
+                    <div className="bg-[#2D36E0] text-white rounded-full p-4">
+                      <Bell size={24} />
+                    </div>
+                    <div>
+                      <p className="font-medium">{item.title}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {item.body}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-3">
+                        {formatFullDate(item.createdAt)}
+                      </p>
+
+                      {!item.isRead && (
+                        <button
+                          onClick={() => markAsRead(item._id)}
+                          className="text-xs text-blue-500"
+                        >
+                          Mark as read
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </>
+            ) : (
+              <div className="w-full min-h-32 flex items-center justify-center text-sm text-gray-500">
+                <p>You have no notification</p>
               </div>
-            ))}
+            )}
           </div>
         </TabsContent>
 
         <TabsContent value="week" className="mt-5">
           <div className="flex flex-col gap-4">
-            {notifications_data.week.map((item) => (
-              <div key={item.id} className="w-full flex items-start gap-4">
-                <div className="bg-[#2D36E0] text-white rounded-full p-4">
-                  <Bell size={24} />
-                </div>
-                <div>
-                  <p className="font-medium">{item.title}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {item.message}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-3">{item.date}</p>
-                </div>
+            {week.length > 0 ? (
+              <>
+                {week.map((item) => (
+                  <div key={item._id} className="w-full flex items-start gap-4">
+                    <div className="bg-[#2D36E0] text-white rounded-full p-4">
+                      <Bell size={24} />
+                    </div>
+                    <div>
+                      <p className="font-medium">{item.title}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {item.body}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-3">
+                        {formatFullDate(item.createdAt)}
+                      </p>
+
+                      {!item.isRead && (
+                        <button
+                          onClick={() => markAsRead(item._id)}
+                          className="text-xs text-blue-500"
+                        >
+                          Mark as read
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </>
+            ) : (
+              <div className="w-full min-h-32 flex items-center justify-center text-sm text-gray-500">
+                <p>You have no notification</p>
               </div>
-            ))}
+            )}
           </div>
         </TabsContent>
 
         <TabsContent value="past" className="mt-5">
           <div className="flex flex-col gap-4">
-            {notifications_data.past.map((item) => (
-              <div key={item.id} className="w-full flex items-start gap-4">
-                <div className="bg-[#2D36E0] text-white rounded-full p-4">
-                  <Bell size={24} />
-                </div>
-                <div>
-                  <p className="font-medium">{item.title}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {item.message}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-3">{item.date}</p>
-                </div>
+            {past.length > 0 ? (
+              <>
+                {past.map((item) => (
+                  <div key={item._id} className="w-full flex items-start gap-4">
+                    <div className="bg-[#2D36E0] text-white rounded-full p-4">
+                      <Bell size={24} />
+                    </div>
+                    <div>
+                      <p className="font-medium">{item.title}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {item.body}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-3">
+                        {formatFullDate(item.createdAt)}
+                      </p>
+
+                      {!item.isRead && (
+                        <button
+                          onClick={() => markAsRead(item._id)}
+                          className="text-xs text-blue-500"
+                        >
+                          Mark as read
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </>
+            ) : (
+              <div className="w-full min-h-32 flex items-center justify-center text-sm text-gray-500">
+                <p>You have no notification</p>
               </div>
-            ))}
+            )}
           </div>
         </TabsContent>
       </Tabs>

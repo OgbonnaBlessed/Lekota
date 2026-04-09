@@ -5,12 +5,17 @@ import { useEffect, useRef, useState } from "react";
 import Modal from "../ui/modal";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAppSelector } from "@/redux/hooks";
+import { useGetNotificationsQuery } from "@/redux/api/notification.api";
 
 const searches = ["Search 1", "Search 2", "Search 3", "Search 4", "Search 5"];
 
 const Header = () => {
   const user = useAppSelector((state) => state.auth.user);
   const role = user?.role;
+
+  const { data } = useGetNotificationsQuery({});
+  const unreadCount = data?.unreadCount || 0;
+
   const [reveal, setReveal] = useState<boolean>(false);
   const [show, setShow] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
@@ -89,9 +94,20 @@ const Header = () => {
           </div>
         )}
         <div className="flex items-center justify-between gap-5">
-          <Link href="/dashboard/staff/notifications" className="relative">
+          <Link
+            href={
+              role === "staff"
+                ? "../notifications"
+                : "../notifications"
+            }
+            className="relative"
+          >
             <Bell size={18} />
-            <div className="w-2 h-2 rounded-full bg-red-500 absolute -top-1 -right-1" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-2 -right-1 bg-red-500 text-white text-[10px] px-1 rounded-full">
+                {unreadCount}
+              </span>
+            )}
           </Link>
 
           <div ref={ref} className="relative hidden md:block">

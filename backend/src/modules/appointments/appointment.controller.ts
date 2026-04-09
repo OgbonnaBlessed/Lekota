@@ -10,7 +10,7 @@ export const getClientAppointments = async (req: any, res: Response) => {
     client: req.user.id,
   }).populate("staff", "name email");
 
-  res.json(appointments);
+  res.json({ message: "Fetched appointments successfully", appointments });
 };
 
 // ========================================
@@ -26,17 +26,25 @@ export const getSingleAppointment = async (req: any, res: Response) => {
     return res.status(404).json({ message: "Not found" });
   }
 
-  res.json(appointment);
+  res.json({ message: "Appointment fetched successfully", appointment });
 };
 
 export const createAppointment = async (req: any, res: Response) => {
-  const appointment = await createAppointmentService({
+  const result = await createAppointmentService({
     ...req.body,
     clientId: req.user.id,
   });
 
-  console.log(appointment);
-  res.json(appointment);
+  if (!result.success) {
+    return res.status(400).json({
+      message: result.message,
+    });
+  }
+
+  return res.status(201).json({
+    message: result.message,
+    appointment: result.data,
+  });
 };
 
 export const cancelAppointment = async (req: any, res: Response) => {
@@ -58,31 +66,61 @@ export const cancelAppointment = async (req: any, res: Response) => {
 };
 
 export const rescheduleAppointment = async (req: any, res: Response) => {
-  const { id, newDate, newStartTime } = req.body;
+  const { id, newDate, newStartTime, serviceId } = req.body;
 
-  const old = await Appointment.findOne({
+  const appointment = await Appointment.findOne({
     _id: id,
     client: req.user.id,
   });
 
-  if (!old) return res.status(404).json({ message: "Not found" });
+  if (!appointment) {
+    return res.status(404).json({ message: "Not found" });
+  }
 
-  const newAppointment = await createAppointmentService({
-    staffId: old.staff,
-    clientId: old.client,
+  if (appointment.status === "completed") {
+    return res.status(400).json({
+      message: "Completed appointments cannot be rescheduled",
+    });
+  }
+
+  // 🔥 VALIDATE using service (no creation)
+  const result = await createAppointmentService({
+    staffId: appointment.staff,
+    clientId: appointment.client,
     date: newDate,
     startTime: newStartTime,
-    duration: 30,
-    buffer: 10,
-    // service: old.service,
-    // subService: old.subService,
-    reason: old.reason,
+    serviceId,
+    service: appointment.service,
+    subService: appointment.subService,
+    reason: appointment.reason,
+    type: appointment.type,
+    excludeAppointmentId: appointment._id, // ✅ CRITICAL
   });
 
-  old.status = "cancelled";
-  await old.save();
+  if (!result.success || !result.data) {
+    return res.status(400).json({
+      message: result.message,
+    });
+  }
 
-  res.json(newAppointment);
+  // ✅ UPDATE IN-PLACE
+  appointment.date = newDate;
+  appointment.startTime = newStartTime;
+  appointment.endTime = result.data.endTime;
+  appointment.duration = result.data.duration;
+  appointment.buffer = result.data.buffer;
+
+  // Optional: regenerate meeting link if virtual
+  if (appointment.type === "virtual") {
+    appointment.meetingLink = result.data.meetingLink;
+  }
+
+  await appointment.save();
+
+  return res.status(200).json({
+    message: "Appointment updated successfully",
+    appointment,
+  });
 };
 
 // ========================================
@@ -106,4 +144,46 @@ export const rateAppointment = async (req: any, res: Response) => {
   await appointment.save();
 
   res.json(appointment);
+};
+
+export const addSessionNote = async (req: any, res: Response) => {
+  const { id, note } = req.body;
+
+  const appointment = await Appointment.findById(id);
+
+  if (!appointment) {
+    return res.status(404).json({ message: "Not found" });
+  }
+
+  appointment.sessionNotes.push({
+    user: req.user.id,
+    note,
+  });
+
+  await appointment.save();
+
+  res.json({ message: "Note added successfully", appointment });
+};
+
+export const deleteAppointment = async (req: any, res: Response) => {
+  const { id } = req.params;
+
+  const appointment = await Appointment.findOne({
+    _id: id,
+    client: req.user.id,
+  });
+
+  if (!appointment) {
+    return res.status(404).json({ message: "Not found" });
+  }
+
+  if (!["cancelled", "absent"].includes(appointment.status)) {
+    return res.status(400).json({
+      message: "Only cancelled or absent appointments can be deleted",
+    });
+  }
+
+  await appointment.deleteOne();
+
+  res.json({ message: "Appointment deleted successfully" });
 };

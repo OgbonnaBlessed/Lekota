@@ -6,9 +6,21 @@ const AppointmentSchema = new Schema(
     staff: { type: Schema.Types.ObjectId, ref: "User" },
     client: { type: Schema.Types.ObjectId, ref: "User" },
 
+    serviceId: String,
+
     date: Date,
     startTime: String,
     endTime: String,
+    duration: Number,
+    buffer: Number,
+
+    type: {
+      type: String,
+      enum: ["onsite", "virtual"],
+      default: "onsite",
+    },
+
+    meetingLink: String,
 
     status: {
       type: String,
@@ -16,10 +28,19 @@ const AppointmentSchema = new Schema(
       default: "pending",
     },
 
+    service: String,
+    subService: String,
+
     reason: String,
     cancelReason: String,
 
-    sessionNotes: String,
+    sessionNotes: [
+      {
+        user: { type: Schema.Types.ObjectId, ref: "User" },
+        note: String,
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
     rating: Number,
     remarks: String,
   },

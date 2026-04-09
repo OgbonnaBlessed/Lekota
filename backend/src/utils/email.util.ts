@@ -4,20 +4,20 @@ dotenv.config();
 import nodemailer from "nodemailer";
 
 export const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
+  host: "smtp.mail.yahoo.com",
+  port: 465, // or 587
+  secure: true, // true for 465, false for 587
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  connectionTimeout: 5000, // ⏱️ 5 seconds
-  greetingTimeout: 5000,
-  socketTimeout: 5000,
+  tls: {
+    rejectUnauthorized: false,
+  },
 });
 
-export const sendEmail = async (to: string, subject: string, html: string) => {
-  await transporter.sendMail({
+export const sendEmail = (to: string, subject: string, html: string) => {
+  transporter.sendMail({
     from: `"Lekota" <${process.env.EMAIL_USER}>`,
     to,
     subject,

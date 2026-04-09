@@ -1,11 +1,15 @@
 "use client";
 
+import { useAppSelector } from "@/redux/hooks";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 const Navbar = () => {
+  const user = useAppSelector((state) => state.auth.user);
+  const role = user?.role;
+
   const [open, setOpen] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -51,9 +55,19 @@ const Navbar = () => {
           <Link href="/#statement" className="text-sm cursor-pointer">
             Statement
           </Link>
-          <Link href="/signup">
+          <Link
+            href={
+              role && role === "admin"
+                ? "/dashboard/admin/overview"
+                : role === "tenant_admin"
+                  ? "/dashboard/tenant/overview"
+                  : role === "staff"
+                    ? "/dashboard/staff/profile"
+                    : "/dashboard/client/profile"
+            }
+          >
             <p className="text-sm text-white bg-[#2D36E0] rounded-full p-4">
-              Get started
+              {role ? "Dashboard" : "Get started"}
             </p>
           </Link>
         </div>
@@ -81,6 +95,7 @@ const Navbar = () => {
                 Legal
               </Link>
               <p className="text-sm">Statement</p>
+
               <Link href="/signup">
                 <p className="text-xs text-white bg-[#2D36E0] rounded-full p-4">
                   Get started

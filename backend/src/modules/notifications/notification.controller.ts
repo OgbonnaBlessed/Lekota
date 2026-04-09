@@ -6,5 +6,25 @@ export const getNotifications = async (req: any, res: Response) => {
     user: req.user.id,
   }).sort({ createdAt: -1 });
 
-  res.json(notifications);
+  const unreadCount = await Notification.countDocuments({
+    user: req.user.id,
+    $or: [{ isRead: false }, { isRead: { $exists: false } }],
+  });
+
+  res.json({
+    message: "Notifications fetched",
+    notifications,
+    unreadCount,
+  });
+};
+
+export const markAsRead = async (req: any, res: Response) => {
+  const { id } = req.body;
+
+  await Notification.findOneAndUpdate(
+    { _id: id, user: req.user.id },
+    { isRead: true },
+  );
+
+  res.json({ message: "Marked as read" });
 };

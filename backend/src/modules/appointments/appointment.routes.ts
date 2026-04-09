@@ -6,6 +6,8 @@ import {
   getClientAppointments,
   getSingleAppointment,
   rateAppointment,
+  addSessionNote,
+  deleteAppointment,
 } from "./appointment.controller";
 
 import { protect } from "@/middleware/auth.middleware";
@@ -17,7 +19,7 @@ const router = Router();
 // ========================================
 // 📅 CREATE APPOINTMENT
 // ========================================
-router.post("/", protect([Role.CLIENT]), createAppointment);
+router.post("/", protect([Role.CLIENT]), checkSubscription, createAppointment);
 
 // Get all client appointments
 router.get("/", protect([Role.CLIENT]), getClientAppointments);
@@ -35,5 +37,7 @@ router.patch("/cancel", protect([Role.CLIENT]), cancelAppointment);
 // ========================================
 router.patch("/reschedule", protect([Role.CLIENT]), rescheduleAppointment);
 router.patch("/rate", protect([Role.CLIENT]), rateAppointment);
+router.patch("/note", protect([Role.CLIENT]), addSessionNote);
+router.delete("/:id", protect([Role.CLIENT]), deleteAppointment);
 
 export default router;

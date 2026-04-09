@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCreateAppointmentMutation } from "@/redux/api/appointment.api";
 import { useGetStaffAvailabilityQuery } from "@/redux/api/client.api";
 import { useGetStaffByIdQuery } from "@/redux/api/staff.api";
+import { useGetTenantServicesQuery } from "@/redux/api/staff.api";
 import { TimePicker } from "antd";
 import { AlarmClock, ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -15,6 +16,8 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import dayjs from "dayjs";
+import addMinutes from "@/utils/add-minutes";
 const { RangePicker } = TimePicker;
 
 type Schedule = {
@@ -25,11 +28,13 @@ type Schedule = {
 const Page = () => {
   const params = useSearchParams();
   const staffId = params.get("staffId");
-  const serviceSchedules = params.get("serviceSchedules");
-  console.log("Service schedules:", serviceSchedules)
+  const serviceId = params.get("serviceId");
 
   const { data: staffData } = useGetStaffByIdQuery(staffId);
   const staff = staffData?.staff;
+
+  const { data: servicesData } = useGetTenantServicesQuery({});
+  const service = servicesData?.services?.find((s: any) => s._id === serviceId);
 
   const { data: availabilityData } = useGetStaffAvailabilityQuery(staffId);
   const availability = availabilityData || [];
@@ -45,14 +50,7 @@ const Page = () => {
   const [appointments, setAppointments] = useState<
     Record<string, [string, string][]>
   >({});
-  const [date, setDate] = useState<Date | undefined>(
-    () =>
-      new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        new Date().getDay() - 2,
-      ),
-  );
+  const [date, setDate] = useState<Date | undefined>(() => new Date());
 
   const availableDays = availability.map((a: any) => a.day);
 
@@ -62,8 +60,19 @@ const Page = () => {
 
   const dayAvailability = availability.find((a: any) => a.day === selectedDay);
 
+  const duration = service?.schedules?.[0]?.duration;
+  const buffer = service?.schedules?.[0]?.buffer;
+
   const handleSave = () => {
-    if (!date || !timeRange) return;
+    if (!date) {
+      toast.error("Please select a date");
+      return;
+    }
+
+    if (!timeRange) {
+      toast.error("Please select a time");
+      return;
+    }
 
     const key = date.toDateString();
 
@@ -75,33 +84,35 @@ const Page = () => {
       return;
     }
 
-    setAppointments((prev) => ({
-      ...prev,
-      [key]: [...(prev[key] || []), [timeRange.start_time, timeRange.end_time]],
-    }));
+    // prevent multiple bookings same day
+    if (appointments[key]?.length) {
+      toast.error("You can only book one appointment per day");
+      return;
+    }
 
-    setShowReasonBox(true);
-  };
+    setAppointments({
+      [key]: [[timeRange.start_time, timeRange.end_time]],
+    });
 
-  const handleCancel = () => {
     setShowReasonBox(true);
   };
 
   const handleFinalSubmit = async () => {
-    if (timeRange?.start_time && serviceDuration) {
-      await createAppointment({
-        staffId,
-        date,
-        startTime: timeRange?.start_time,
-        endtime: timeRange?.start_time + serviceDuration,
-        reason,
-        type,
-      });
-    }
+    if (!date) return toast.error("Please select a date");
+    if (!timeRange) return toast.error("Please select a time");
+    if (!reason) return toast.error("Kindly enter a reason");
 
-    // setShowReasonBox(false);
-    // setShowAppointmentBox(false);
-    // router.push("/dashboard/client/appointments");
+    await createAppointment({
+      staffId,
+      serviceId,
+      date,
+      startTime: timeRange.start_time,
+      service: service?.name,
+      subService: staff?.profile?.sub_service?.[0],
+      reason,
+      type,
+    }).unwrap();
+    router.replace("/dashboard/client/appointments");
   };
 
   return (
@@ -136,10 +147,17 @@ const Page = () => {
                 }
               }}
               disabled={(date) => {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                const current = new Date(date);
+                current.setHours(0, 0, 0, 0);
+
                 const day = date.toLocaleDateString("en-US", {
                   weekday: "short",
                 });
-                return !availableDays.includes(day);
+
+                return current < today || !availableDays.includes(day);
               }}
               numberOfMonths={1}
               className="[--cell-size:--spacing(10)] md:[--cell-size:--spacing(20)]"
@@ -180,12 +198,16 @@ const Page = () => {
             <Card className="w-[18rem] max-w-full h-fit p-0">
               <CardContent className="p-0">
                 <div className="w-full flex flex-col gap-5 p-5">
-                  <h2>{staff?.name}&apos;s availability</h2>
-                  <p className="text-xs text-[#2D36E0]">
-                    {dayAvailability
-                      ? `${dayAvailability.startTime} - ${dayAvailability.endTime}`
-                      : "Unavailable"}
-                  </p>
+                  <div>
+                    <h1>{staff?.name}&apos;s availability</h1>
+                    <p className="text-xs text-[#2D36E0]">
+                      {dayAvailability
+                        ? `${dayAvailability.startTime} - ${dayAvailability.endTime}`
+                        : "Unavailable"}
+                    </p>
+                  </div>
+
+                  <hr />
 
                   <div className="flex flex-col gap-2 text-sm">
                     <div className="flex items-center gap-1 text-gray-500">
@@ -194,26 +216,35 @@ const Page = () => {
 
                     <RangePicker
                       format="HH:mm"
-                      placeholder={["9:00", "9:40"]}
-                      suffixIcon={null}
+                      value={
+                        timeRange
+                          ? [
+                              dayjs(timeRange.start_time, "HH:mm"),
+                              dayjs(timeRange.end_time, "HH:mm"),
+                            ]
+                          : undefined
+                      }
                       allowClear={false}
                       variant="borderless"
                       className="custom-range-picker"
-                      onChange={(values) => {
-                        if (values && values[0] && values[1]) {
+                      onCalendarChange={(values) => {
+                        if (values && values[0]) {
+                          const start = values[0].format("HH:mm");
+                          const end = addMinutes(start, duration + buffer);
+
                           setTimeRange({
-                            start_time: values[0].format("HH:mm"),
-                            end_time: values[1].format("HH:mm"),
+                            start_time: start,
+                            end_time: end,
                           });
                         }
                       }}
                     />
                   </div>
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between text-xs mt-2">
                     <div
                       onClick={() => setType("onsite")}
-                      className="flex items-center gap-1"
+                      className={`flex items-center gap-1 py-2 px-3 rounded-sm cursor-pointer transition-all duration-300 ease-in-out ${type === "onsite" && "bg-blue-50"}`}
                     >
                       <span className="w-2 h-2 bg-[#2D36E0] rounded-full" />
                       <p>On site</p>
@@ -221,24 +252,21 @@ const Page = () => {
 
                     <div
                       onClick={() => setType("virtual")}
-                      className="flex items-center gap-1"
+                      className={`flex items-center gap-1 py-2 px-3 rounded-sm cursor-pointer transition-all duration-300 ease-in-out ${type === "virtual" && "bg-red-50"}`}
                     >
                       <span className="w-2 h-2 bg-red-500 rounded-full" />
                       <p>Virtual</p>
                     </div>
                   </div>
 
-                  <div className="w-full flex items-center justify-between">
-                    <div
-                      className="text-red-500 cursor-pointer"
-                      onClick={handleCancel}
-                    >
-                      Cancel
-                    </div>
+                  <div className="w-full flex items-center justify-between text-xs mt-2">
+                    <Link href="../services">
+                      <p className="text-red-500">Cancel</p>
+                    </Link>
 
                     <Button
                       onClick={handleSave}
-                      className="w-fit self-end bg-[#2D36E0] rounded-none p-4"
+                      className="w-fit self-end bg-[#2D36E0] rounded-sm p-4 text-xs!"
                     >
                       Save
                     </Button>
@@ -250,17 +278,19 @@ const Page = () => {
             {/* Textarea container */}
             {showReasonBox && (
               <div className="max-w-full border border-gray-200 rounded-lg overflow-hidden">
-                <div className="text-gray-500 bg-gray-200 p-5">Reason</div>
+                <div className="text-gray-500 bg-gray-200 p-5 text-sm">
+                  Reason
+                </div>
                 <div className="relative flex flex-col justify-between px-2.5 py-2">
                   <Textarea
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
                     placeholder="Add reason..."
-                    className="min-h-52 border-none resize-none outline-none focus:ring-0 focus-visible:ring-0"
+                    className="min-h-52 border-none resize-none outline-none focus:ring-0 focus-visible:ring-0 text-sm"
                   />
                   <Button
                     onClick={handleFinalSubmit}
-                    className="w-fit self-end bg-[#2D36E0] rounded-none p-4"
+                    className="w-fit self-end bg-[#2D36E0] rounded-sm  p-4 text-xs!"
                   >
                     Send
                   </Button>

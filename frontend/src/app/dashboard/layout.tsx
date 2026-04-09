@@ -13,7 +13,6 @@ export default function DashboardLayout({
 }) {
   const user = useAppSelector((state) => state.auth.user);
   const role = user?.role;
-  console.log("user:", user);
 
   if (!user) {
     return (
