@@ -3,6 +3,7 @@
 "use client";
 
 import Animate from "@/components/layout/Animate";
+import Avatar from "@/components/ui/avatar";
 import {
   CardSkeleton,
   PaginationSkeleton,
@@ -18,7 +19,6 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGetSchedulesQuery } from "@/redux/api/staff.api";
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -73,7 +73,11 @@ const Status = ({ status }: { status: string }) => (
   <div className="flex items-center gap-2">
     <span
       className={`w-2 h-2 rounded-full ${
-        status === "completed" ? "bg-green-500" : "bg-gray-400"
+        status === "completed"
+          ? "bg-green-500"
+          : status === "pending"
+            ? "bg-yellow-500"
+            : "bg-red-500"
       }`}
     />
     <p className="capitalize">{status}</p>
@@ -98,14 +102,7 @@ const ScheduleTable = ({ data }: { data: Schedule[] }) => (
           <TableRow key={item.id}>
             <TableCell className="p-5">
               <div className="flex items-center gap-2">
-                <div className="relative w-8 h-8 rounded-full overflow-hidden">
-                  <Image
-                    src={item.user.image}
-                    alt={item.user.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
+                <Avatar image={item.user.image} name={item.user.name} />
                 <p>{item.user.name}</p>
               </div>
             </TableCell>
@@ -125,7 +122,7 @@ const ScheduleTable = ({ data }: { data: Schedule[] }) => (
             </TableCell>
 
             <TableCell className="text-center">
-              <Link href={`./schedules/${item.id}`}>
+              <Link href={`/dashboard/staff/schedules/${item.id}`}>
                 <p className="text-[#2D36E0]">View schedule</p>
               </Link>
             </TableCell>
@@ -145,14 +142,7 @@ const ScheduleCards = ({ data }: { data: Schedule[] }) => (
         className="shadow shadow-gray-300 rounded-xl p-4 bg-white space-y-3"
       >
         <div className="flex items-center gap-2 font-semibold">
-          <div className="relative w-8 h-8 rounded-full overflow-hidden">
-            <Image
-              src={item.user.image}
-              alt={item.user.name}
-              fill
-              className="object-cover"
-            />
-          </div>
+          <Avatar image={item.user.image} name={item.user.name} />
           <p>{item.user.name}</p>
         </div>
 
@@ -233,7 +223,6 @@ const Section = ({
   setPage: (n: number) => void;
 }) => {
   const { data, isLoading } = useGetSchedulesQuery(type);
-
   const [showSkeleton, setShowSkeleton] = useState(true);
 
   useEffect(() => {
@@ -255,7 +244,7 @@ const Section = ({
   const mapped = schedules.map((item: any) => ({
     id: item._id,
     user: {
-      image: item.client?.profile?.image || "/banner.png",
+      image: item.client?.profile?.image,
       name: item.client?.name,
     },
     date: new Date(item.date).toDateString(),

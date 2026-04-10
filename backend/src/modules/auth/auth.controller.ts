@@ -24,7 +24,8 @@ const sendAuthResponse = (res: Response, user: any, message: string) => {
       email: user.email,
       role: user.role,
       name: user.name,
-      tenant: user.tenant || null, // ✅ VERY IMPORTANT
+      tenant: user.tenant || null,
+      profile: user.profile || {},
     },
   });
 };

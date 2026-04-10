@@ -4,15 +4,16 @@ import { useGetTenantServicesQuery } from "@/redux/api/staff.api";
 import { useAppSelector } from "@/redux/hooks";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bell, ChevronDown, LogOut, Search } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import Avatar from "../ui/avatar";
 import Modal from "../ui/modal";
 import SearchServiceModal from "./SearchServiceModal";
 
 const Header = () => {
   const user = useAppSelector((state) => state.auth.user);
   const role = user?.role;
+  console.log("user:", user);
 
   const { data } = useGetNotificationsQuery({});
   const unreadCount = data?.unreadCount || 0;
@@ -33,13 +34,6 @@ const Header = () => {
   const [openSearchModal, setOpenSearchModal] = useState<boolean>(false);
   const ref = useRef<HTMLDivElement>(null);
   const ref_2 = useRef<HTMLDivElement>(null);
-
-  const shouldUseFallback =
-    !user?.profile?.image ||
-    user?.role === "tenant_admin" ||
-    user?.role === "admin";
-
-  const firstLetter = user?.name?.charAt(0)?.toUpperCase() || "?";
 
   // Handle outside click
   useEffect(() => {
@@ -99,7 +93,7 @@ const Header = () => {
                             setSelectedService(service);
                             setOpenSearchModal(true);
                           }}
-                          className="flex items-center justify-between text-sm hover:bg-gray-100 rounded-lg transition-all duration-300 ease-in-out p-3 cursor-pointer"
+                          className="text-sm py-2 px-3 rounded-md cursor-pointer hover:bg-gray-100 transition-all duration-300 ease-in-out"
                         >
                           {service.name}
                         </div>
@@ -137,16 +131,7 @@ const Header = () => {
               onClick={() => setOpen((prev) => !prev)}
               className="flex items-center gap-2 cursor-pointer"
             >
-              <div className="relative w-5 aspect-square rounded-full overflow-hidden">
-                <Image
-                  src="/banner.png"
-                  alt="Banner"
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              </div>
-
+              <Avatar image={user?.profile?.image || user?.image} name={user?.name} />
               <ChevronDown size={14} />
             </div>
 
@@ -161,20 +146,7 @@ const Header = () => {
                   className="absolute top-full right-0 mt-2 flex flex-col gap-3 bg-white shadow p-5 rounded-lg z-10"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="relative w-8 aspect-square rounded-full overflow-hidden flex items-center justify-center bg-gray-200">
-                      {shouldUseFallback ? (
-                        <span className="text-xs font-semibold text-gray-700">
-                          {firstLetter}
-                        </span>
-                      ) : (
-                        <Image
-                          src={user.profile.image}
-                          alt={user.name}
-                          fill
-                          className="object-cover"
-                        />
-                      )}
-                    </div>
+                    <Avatar image={user?.image} name={user?.name} />
 
                     <div className="text-xs leading-tight group-data-[collapsible=icon]:hidden">
                       <p className="font-medium">{user?.name}</p>

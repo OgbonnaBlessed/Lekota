@@ -41,13 +41,13 @@ type Form = {
 
 const Page = () => {
   const { data, isLoading } = useGetStaffProfileQuery({});
+
+  const [updateProfile, { isLoading: updating }] =
+    useUpdateStaffProfileMutation();
   const { data: servicesData } = useGetTenantServicesQuery({});
   const services = servicesData?.services || [];
 
-  const [updateProfile] = useUpdateStaffProfileMutation();
   const [show, setShow] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [imageLoading, setImageLoading] = useState(false);
   const [showAddSubserviceField, setShowAddSubserviceField] =
     useState<boolean>(false);
 
@@ -130,40 +130,21 @@ const Page = () => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ===============================
-  // IMAGE SELECT
-  // ===============================
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
-      setImageLoading(true);
-
       const file = e.target.files[0];
+
+      // ❌ block videos
+      if (!file.type.startsWith("image/")) {
+        toast.error("Only images allowed");
+        return;
+      }
 
       setForm((prev) => ({
         ...prev,
         image: file,
       }));
     }
-  };
-
-  // ===============================
-  // CLOUDINARY UPLOAD
-  // ===============================
-  const uploadToCloudinary = async (file: File) => {
-    const fd = new FormData();
-    fd.append("file", file);
-    fd.append("upload_preset", "unsigned_preset");
-
-    const res = await fetch(
-      "https://api.cloudinary.com/v1_1/dddvbg9tm/image/upload",
-      {
-        method: "POST",
-        body: fd,
-      },
-    );
-
-    const data = await res.json();
-    return data.secure_url;
   };
 
   const removeSubService = (index: number) => {
@@ -174,51 +155,40 @@ const Page = () => {
   };
 
   useEffect(() => {
+    let previewUrl: string;
+
+    if (form.image) {
+      previewUrl = URL.createObjectURL(form.image);
+    }
+
     return () => {
-      if (form.image) {
-        URL.revokeObjectURL(URL.createObjectURL(form.image));
-      }
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
     };
   }, [form.image]);
 
-  // ===============================
-  // SUBMIT
-  // ===============================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    setUploading(true);
+    const formData = new FormData();
 
-    let imageUrl = form.imageUrl;
-
-    if (form.image) {
-      try {
-        imageUrl = await uploadToCloudinary(form.image);
-      } catch {
-        toast.error("Image upload failed");
-        setUploading(false);
-        return;
+    Object.entries(form).forEach(([key, value]) => {
+      if (key === "sub_service") {
+        (value as string[]).forEach((v) => formData.append("sub_service", v));
+      } else if (key === "image" && value) {
+        formData.append("image", value as File);
+      } else if (value) {
+        formData.append(key, value as string);
       }
+    });
+
+    try {
+
+      await updateProfile(formData).unwrap(); // ✅ THIS IS THE MAGIC
+
+      setShow(true);
+    } catch (err) {
+      console.error(err);
     }
-
-    const payload = {
-      name: form.name,
-      email: form.email,
-      service: form.service,
-      sub_service: form.sub_service,
-      address: form.address,
-      postcode: form.postcode,
-      county: form.county,
-      phone: form.phone,
-      bio: form.bio,
-      gender: form.gender,
-      image: imageUrl,
-    };
-
-    await updateProfile(payload);
-
-    setUploading(false);
-    setShow(true);
   };
 
   if (isLoading) return <EditProfileSkeleton />;
@@ -234,15 +204,14 @@ const Page = () => {
 
               <div className="relative w-24 h-24 rounded-full overflow-hidden border border-[#2D36E0]">
                 {form.image ? (
-                  <Image
-                    src={URL.createObjectURL(form.image)}
-                    alt=""
-                    fill
-                    onLoadingComplete={() => setImageLoading(false)}
-                    className={`object-cover transition-opacity duration-500 ${
-                      imageLoading ? "opacity-40" : "opacity-100"
-                    }`}
-                  />
+                  <>
+                    <Image
+                      src={URL.createObjectURL(form.image)}
+                      alt=""
+                      fill
+                      className="object-cover transition-all duration-300"
+                    />
+                  </>
                 ) : form.imageUrl ? (
                   <Image
                     src={form.imageUrl}
@@ -263,9 +232,15 @@ const Page = () => {
                 <p className="text-sm font-medium">{form.name}</p>
                 <p className="text-xs text-gray-400">{form.email}</p>
               </div>
-              <p className="text-xs text-blue-600 flex items-center gap-1">
+              <label className="cursor-pointer text-xs text-blue-600 flex items-center gap-1">
                 <ImageUpIcon size={12} /> Upload photo
-              </p>
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
+              </label>
             </div>
           </div>
 
@@ -472,11 +447,11 @@ const Page = () => {
           {/* BUTTON */}
           <Button
             type="submit"
-            disabled={!hasChanged() || uploading || imageLoading}
+            disabled={!hasChanged() || updating}
             className="w-fit bg-[#2D36E0] disabled:bg-[#2D36E0]/50 p-5"
           >
-            {uploading && <Loader2 size={14} className="animate-spin" />}
-            {uploading ? "Saving..." : "Save Changes"}
+            {updating && <Loader2 size={14} className="animate-spin" />}
+            {updating ? "Saving..." : "Save Changes"}
           </Button>
         </form>
       </Animate>

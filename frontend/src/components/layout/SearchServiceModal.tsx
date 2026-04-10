@@ -95,11 +95,7 @@ const SearchServiceModal = ({ open, onOpenChange, service }: any) => {
                       <div>
                         <p className="font-medium">{user.name}</p>
                         <div className="flex items-center gap-1 flex-wrap text-xs text-gray-500">
-                          {user.profile?.sub_service?.map(
-                            (sub: string, i: number) => (
-                              <p key={i}>{sub}</p>
-                            ),
-                          )}
+                          <p>{user.profile?.sub_service?.join(", ")}</p>
                         </div>
                       </div>
                     </div>
@@ -107,7 +103,7 @@ const SearchServiceModal = ({ open, onOpenChange, service }: any) => {
                 ))
               ) : (
                 <div className="w-full min-h-20 flex items-center justify-center text-sm text-gray-500">
-                  <p>There&apos;s is no staff for this service</p>
+                  <p>There&apos;s is no staff for this subservice</p>
                 </div>
               )}
             </>

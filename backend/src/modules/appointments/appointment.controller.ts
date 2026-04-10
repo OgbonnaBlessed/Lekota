@@ -155,14 +155,27 @@ export const addSessionNote = async (req: any, res: Response) => {
     return res.status(404).json({ message: "Not found" });
   }
 
-  appointment.sessionNotes.push({
-    user: req.user.id,
-    note,
-  });
+  if (!appointment.staff || !appointment.client) {
+    return res.status(400).json({ message: "Unauthorized" });
+  }
+
+  if (appointment.sessionNotes) {
+    // Determine if user is staff or client
+    if (appointment.staff.toString() === req.user.id.toString()) {
+      appointment.sessionNotes.staffNote = note;
+    } else if (appointment.client.toString() === req.user.id.toString()) {
+      appointment.sessionNotes.clientNote = note;
+    } else {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+  }
 
   await appointment.save();
 
-  res.json({ message: "Note added successfully", appointment });
+  res.json({
+    message: "Note saved successfully",
+    sessionNotes: appointment.sessionNotes,
+  });
 };
 
 export const deleteAppointment = async (req: any, res: Response) => {

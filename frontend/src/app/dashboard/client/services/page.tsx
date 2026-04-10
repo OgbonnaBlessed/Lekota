@@ -42,7 +42,7 @@ const Page = () => {
           </div>
 
           {/* SERVICES */}
-          <div className="w-fit flex flex-col gap-4">
+          <div className="w-fit flex flex-col gap-2">
             {filtered.map((service: any) => (
               <div
                 key={service._id}
@@ -50,7 +50,7 @@ const Page = () => {
                   setSelectedService(service);
                   setOpen(true);
                 }}
-                className="py-3 px-4 rounded-lg cursor-pointer hover:bg-gray-100 transition-all duration-300 ease-in-out"
+                className="text-sm py-2 px-3 rounded-md cursor-pointer hover:bg-gray-100 transition-all duration-300 ease-in-out"
               >
                 {service.name}
               </div>

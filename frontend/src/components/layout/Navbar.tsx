@@ -122,11 +122,10 @@ const Navbar = () => {
                 }}
               >
                 {/* HEADER */}
-                <div className="flex items-center justify-between mb-8">
-                  <p className="text-lg text-[#121212]">Lekota</p>
+                <div className="self-end mb-8">
                   <button
                     onClick={() => setOpen(false)}
-                    className="bg-gray-200 rounded-full p-2"
+                    className="rounded-full p-2"
                   >
                     <X size={18} />
                   </button>
@@ -149,7 +148,7 @@ const Navbar = () => {
                 </div>
 
                 {/* CTA */}
-                <div className="mx-auto mt-auto">
+                <div className="mx-auto mt-20">
                   <Link
                     href={
                       role === "admin"

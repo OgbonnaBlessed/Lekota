@@ -34,13 +34,11 @@ const AppointmentSchema = new Schema(
     reason: String,
     cancelReason: String,
 
-    sessionNotes: [
-      {
-        user: { type: Schema.Types.ObjectId, ref: "User" },
-        note: String,
-        createdAt: { type: Date, default: Date.now },
-      },
-    ],
+    sessionNotes: {
+      staffNote: { type: String, default: "" },
+      clientNote: { type: String, default: "" },
+    },
+
     rating: Number,
     remarks: String,
   },

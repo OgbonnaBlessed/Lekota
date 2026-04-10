@@ -4,6 +4,8 @@ import { sendNotification } from "../notifications/notification.service";
 import { User } from "../users/user.model";
 import { Service } from "../services/service.model";
 import mongoose from "mongoose";
+import cloudinary from "../../config/cloudinary";
+import streamifier from "streamifier";
 
 export const getStaffById = async (req: any, res: Response) => {
   const { id } = req.params;
@@ -47,6 +49,7 @@ export const getStaffProfile = async (req: any, res: Response) => {
     service: user.profile?.service,
     phone: user.profile?.phone,
     sub_service: user.profile?.sub_service,
+    gender: user.profile?.gender,
   };
 
   res.json(response);
@@ -61,14 +64,41 @@ export const updateStaffProfile = async (req: any, res: Response) => {
     email,
     service,
     sub_service,
-    location,
+    address,
+    postcode,
+    county,
     phone,
     bio,
-    image,
     gender,
   } = req.body;
 
   const updateData: any = {};
+
+  let imageUrl;
+
+  if (req.file) {
+    const streamUpload = () =>
+      new Promise<string>((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "lekota_profiles" },
+          (error, result) => {
+            if (result) resolve(result.secure_url);
+            else reject(error);
+          },
+        );
+
+        streamifier.createReadStream(req.file.buffer).pipe(stream);
+      });
+
+    try {
+      imageUrl = await streamUpload();
+      updateData["profile.image"] = imageUrl;
+    } catch (err) {
+      return res.status(500).json({
+        message: "Image upload failed",
+      });
+    }
+  }
 
   if (name) updateData.name = name;
   if (email) updateData.email = email;
@@ -104,10 +134,11 @@ export const updateStaffProfile = async (req: any, res: Response) => {
     }
   }
 
-  if (location) updateData["profile.location"] = location;
+  if (address) updateData["profile.address"] = address;
+  if (postcode) updateData["profile.postcode"] = postcode;
+  if (county) updateData["profile.county"] = county;
   if (phone) updateData["profile.phone"] = phone;
   if (bio) updateData["profile.bio"] = bio;
-  if (image) updateData["profile.image"] = image;
   if (gender) updateData["profile.gender"] = gender;
 
   const user = await User.findByIdAndUpdate(
@@ -122,6 +153,9 @@ export const updateStaffProfile = async (req: any, res: Response) => {
 
   // ✅ RETURN SAME SHAPE AS GET PROFILE
   const response = {
+    id: user.id,
+    role: user.role,
+    tenant: user.tenant,
     name: user.name,
     email: user.email,
     image: user.profile?.image,
@@ -132,7 +166,7 @@ export const updateStaffProfile = async (req: any, res: Response) => {
     bio: user.profile?.bio,
     service: user.profile?.service,
     sub_service: user.profile?.sub_service,
-    gender: user.profile?.gender || "other",
+    gender: user.profile?.gender,
   };
 
   await sendNotification({
@@ -143,7 +177,7 @@ export const updateStaffProfile = async (req: any, res: Response) => {
 
   res.json({
     message: "Profile updated successfully",
-    data: response,
+    user: response,
   });
 };
 
@@ -193,8 +227,17 @@ export const getStaffSchedules = async (req: any, res: Response) => {
 // 🔍 GET SINGLE SCHEDULE
 // ========================================
 export const getSingleSchedule = async (req: any, res: Response) => {
+  const { id } = req.params;
+
+  // ✅ VALIDATE OBJECT ID
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
+      message: "Invalid schedule ID",
+    });
+  }
+
   const schedule = await Appointment.findOne({
-    _id: req.params.id,
+    _id: id,
     staff: req.user.id,
   })
     .populate("client", "name email profile.image")
@@ -204,9 +247,16 @@ export const getSingleSchedule = async (req: any, res: Response) => {
     return res.status(404).json({ message: "Not found" });
   }
 
-  res.json(schedule);
-};
+  const myNote = schedule.sessionNotes?.staffNote || "";
 
+  res.json({
+    message: "Schedule fetched successfully",
+    schedule: {
+      ...schedule,
+      myNote,
+    },
+  });
+};
 // ========================================
 // ✅ UPDATE APPOINTMENT STATUS
 // ========================================
@@ -223,16 +273,15 @@ export const updateAppointmentStatus = async (req: any, res: Response) => {
   }
 
   appointment.status = status;
-  appointment.sessionNotes = sessionNotes || "";
+
+  if (appointment.sessionNotes) {
+    appointment.sessionNotes.staffNote = sessionNotes;
+  }
 
   await appointment.save();
 
-  // Notify client
-  await sendNotification({
-    userId: req.user.id,
-    title: "Appointment Update",
-    body: `Your appointment was marked as ${status}`,
+  res.json({
+    message: "Appointment updated successfully",
+    appointment,
   });
-
-  res.json(appointment);
 };

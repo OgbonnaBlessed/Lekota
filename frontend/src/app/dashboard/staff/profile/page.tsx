@@ -45,8 +45,8 @@ const Page = () => {
           </div>
 
           <div>
-            <h2>{user?.location || "Not set"}</h2>
-            <p>Location</p>
+            <h2>{user?.address || "Not set"}</h2>
+            <p>Address</p>
           </div>
 
           <div className="flex flex-col items-end">

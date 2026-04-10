@@ -14,24 +14,23 @@ import {
 } from "@/components/ui/sidebar";
 
 import { Role, sidebarConfig } from "@/lib/sidebar-config";
+import { useInitializePaymentMutation } from "@/redux/api/tenant.api";
 import { useAppSelector } from "@/redux/hooks";
+import { logout } from "@/redux/slices/auth.slice";
 import { persistor } from "@/redux/store";
 import { Home, LogOut, PanelLeft, Shield, Stars } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
+import Avatar from "../ui/avatar";
 import Modal from "../ui/modal";
-import { logout } from "@/redux/slices/auth.slice";
-import { useInitializePaymentMutation } from "@/redux/api/tenant.api";
 
 export function AppSidebar({ role }: { role: Role }) {
   const router = useRouter();
   const [initializePayment] = useInitializePaymentMutation();
   const dispatch = useDispatch();
   const user = useAppSelector((state) => state.auth.user);
-  console.log("Tenant admin:", user);
   const [show, setShow] = useState<boolean>(false);
   const [pay, setPay] = useState<boolean>(false);
   const pathname = usePathname();
@@ -43,13 +42,6 @@ export function AppSidebar({ role }: { role: Role }) {
       toggleSidebar();
     }
   };
-
-  const shouldUseFallback =
-    !user?.profile?.image ||
-    user?.role === "tenant_admin" ||
-    user?.role === "admin";
-
-  const firstLetter = user?.name?.charAt(0)?.toUpperCase() || "?";
 
   const handleLogout = async () => {
     router.push("/signin");
@@ -217,20 +209,7 @@ export function AppSidebar({ role }: { role: Role }) {
                   className="w-fit hover:bg-transparent group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:py-4 transition-all duration-300 rounded-lg"
                 >
                   <div className="flex items-center gap-3 px-3 py-2">
-                    <div className="relative w-7 min-w-5 aspect-square rounded-full overflow-hidden flex items-center justify-center bg-gray-200">
-                      {shouldUseFallback ? (
-                        <span className="text-xs font-semibold text-gray-700">
-                          {firstLetter}
-                        </span>
-                      ) : (
-                        <Image
-                          src={user.profile.image}
-                          alt={user.name}
-                          fill
-                          className="object-cover"
-                        />
-                      )}
-                    </div>
+                    <Avatar image={user?.profile?.image || user?.image} name={user?.name} className="min-w-5!" />
 
                     <div className="text-xs leading-tight group-data-[collapsible=icon]:hidden">
                       <p className="font-medium">{user?.name}</p>
