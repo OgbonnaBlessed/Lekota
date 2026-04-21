@@ -19,7 +19,7 @@ export const protect =
       req.user = decoded;
 
       // ✅ ROLE CHECK (if provided)
-      if (roles.length && !roles.includes(decoded.role)) {
+      if (roles.length > 0 && !roles.includes(decoded.role)) {
         return res.status(403).json({ message: "Forbidden" });
       }
 
